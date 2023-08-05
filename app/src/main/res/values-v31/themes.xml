@@ -7,6 +7,4 @@
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/transparent_image</item>
 
     </style>
-
-
 </resources>

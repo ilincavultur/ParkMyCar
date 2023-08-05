@@ -3,7 +3,7 @@
 
     <item>
         <bitmap
-            android:src="@drawable/ic_splash_launcher_2"
+            android:src="@drawable/ic_splash_launcher_3"
             android:gravity="center"
             />
     </item>
