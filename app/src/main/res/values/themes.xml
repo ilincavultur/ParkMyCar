@@ -8,7 +8,7 @@
 
     <style name="Theme.App.SplashScreenTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/purple_primary</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_launcher</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/bg_splash</item>
         <item name="postSplashScreenTheme">@style/Theme.ParkMyCar</item>
     </style>
 </resources>
