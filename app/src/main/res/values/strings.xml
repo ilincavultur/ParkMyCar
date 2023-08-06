@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ParkMyCar</string>
     <string name="title_activity_splash">SplashActivity</string>
+    <string name="splash_screen">Splash Screen</string>
+    <string name="map_screen">Map Screen</string>
+    <string name="saved_car_spots_screen">Saved Car Spots Screen</string>
+    <string name="saved_parking_spots_screen">Saved Parking Spots Screen</string>
 </resources>

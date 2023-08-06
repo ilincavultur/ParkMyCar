@@ -14,6 +14,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.parkmycar.R
 import com.example.parkmycar.core.navigation.Screen
+import com.example.parkmycar.core.navigation.Screen.MapScreen.route
 
 @Composable
 fun SplashScreen(
@@ -31,7 +32,7 @@ fun SplashScreen(
             progress = { logoAnimationState.progress }
         )
         if (logoAnimationState.isAtEnd && logoAnimationState.isPlaying) {
-            navController.navigate(Screen.HomeScreen.route)
+            navController.navigate(Screen.MapScreen.route)
         }
     }
 }
