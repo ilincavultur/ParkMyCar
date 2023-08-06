@@ -4,12 +4,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.parkmycar.core.components.tabs.TabLayout
 import com.example.parkmycar.feature_map.presentation.MapScreen
+import com.example.parkmycar.feature_saved_parking_lots.presentation.SavedParkingSpotsScreen
+import com.example.parkmycar.feature_saved_spots.presentation.SavedCarSpotsScreen
 import com.example.parkmycar.feature_splash_screen.presentation.SplashScreen
 
 @Composable
@@ -27,11 +28,15 @@ fun Navigation(
        }
 
        composable(route = Screen.SavedCarSpotsScreen.route) {
-           //SplashScreen(navController = navController)
+           SavedCarSpotsScreen(navController = navController)
        }
 
        composable(route = Screen.SavedParkingSpotsScreen.route) {
-           //SplashScreen(navController = navController)
+           SavedParkingSpotsScreen(navController = navController)
+       }
+
+       composable(route = Screen.TabLayout.route) {
+           TabLayout(navController = navController)
        }
    }
 }

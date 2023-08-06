@@ -5,4 +5,5 @@
     <string name="map_screen">Map Screen</string>
     <string name="saved_car_spots_screen">Saved Car Spots Screen</string>
     <string name="saved_parking_spots_screen">Saved Parking Spots Screen</string>
+    <string name="tab_layout">Tab Layout</string>
 </resources>

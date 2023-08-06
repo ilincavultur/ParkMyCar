@@ -29,7 +29,7 @@ import com.example.parkmycar.core.navigation.Navigation
 import com.example.parkmycar.core.navigation.Screen
 
 @Composable
-fun AppScaffold() {
+fun  AppScaffold() {
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
 
@@ -40,22 +40,15 @@ fun AppScaffold() {
             resourceId = Screen.MapScreen.resourceId
         ),
         BottomNavigationItem(
-            route = Screen.SavedCarSpotsScreen.route,
+            route = Screen.TabLayout.route,
             icon = Icons.Default.BookmarkBorder,
-            resourceId = Screen.SavedCarSpotsScreen.resourceId
+            resourceId = Screen.TabLayout.resourceId
         ),
     )
 
     val screensWithoutBottomBar = listOf<String>(
         Screen.SplashScreen.route
     )
-
-    val screensWithoutTopBar = listOf<String>(
-        Screen.MapScreen.route,
-        Screen.SavedCarSpotsScreen.route,
-        Screen.SavedParkingSpotsScreen.route,
-    )
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -116,7 +109,7 @@ fun AppScaffold() {
                     }
                 }
             }
-        }
+        },
     ) { innerPadding ->
         Navigation(navController = navController, innerPadding = innerPadding)
     }
