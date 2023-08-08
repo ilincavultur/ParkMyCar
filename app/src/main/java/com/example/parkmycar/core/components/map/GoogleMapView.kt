@@ -2,6 +2,7 @@ package com.example.parkmycar.core.components.map
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -13,9 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.parkmycar.R
+import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.presentation.defaultCameraPosition
 import com.example.parkmycar.feature_map.presentation.singapore2
 import com.example.parkmycar.feature_map.presentation.singapore3
@@ -37,9 +41,12 @@ fun GoogleMapView(
     onMapLoaded: () -> Unit = {},
     content: @Composable () -> Unit = {}
 ) {
+    val localContext = LocalContext.current
+    // all of these into the viewmodel
+
     val singaporeState = rememberMarkerState(position = singapore)
-    val singapore2State = rememberMarkerState(position = singapore2)
-    val singapore3State = rememberMarkerState(position = singapore3)
+    val showParkingMarkers = remember { mutableStateOf(true) }
+    val showCarMarkers = remember { mutableStateOf(true) }
 
     var circleCenter by remember { mutableStateOf(singapore) }
     if (singaporeState.dragState == DragState.END) {
@@ -52,9 +59,9 @@ fun GoogleMapView(
     var mapProperties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
-    var mapVisible by remember { mutableStateOf(true) }
+    //var mapVisible by remember { mutableStateOf(true) }
 
-    if (mapVisible) {
+    //if (mapVisible) {
         GoogleMap(
             modifier = modifier,
             cameraPositionState = cameraPositionState,
@@ -73,26 +80,34 @@ fun GoogleMapView(
                 }
                 false
             }
-            MarkerInfoWindowContent(
+
+//            MarkerInfoWindowContent(
+//                state = singapore2State,
+//                title = "Marker with custom info window.\nZoom in has been tapped $ticker times.",
+//                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
+//                onClick = markerClick,
+//            ) {
+//                Text(it.title ?: "Title", color = Color.Blue)
+//            }
+
+//            CustomMarkerInfoWindow(
+//                state = singapore3State,
+//                title = "Hehehehhehe",
+//            )
+
+            CustomMarker(
+                context = localContext,
                 state = singaporeState,
-                title = "Zoom in has been tapped $ticker times.",
-                onClick = markerClick,
-                draggable = true,
-            ) {
-                Text(it.title ?: "Title", color = Color.Red)
-            }
-            MarkerInfoWindowContent(
-                state = singapore2State,
-                title = "Marker with custom info window.\nZoom in has been tapped $ticker times.",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
-                onClick = markerClick,
-            ) {
-                Text(it.title ?: "Title", color = Color.Blue)
-            }
-            Marker(
-                state = singapore3State,
-                title = "Marker in Singapore",
-                onClick = markerClick
+                iconResourceId = R.drawable.ic_baseline_local_parking_24,
+                markerClick = markerClick,
+                onRemoveParkingSpot = {
+                                      Toast.makeText(localContext, "Hey i m here", Toast.LENGTH_LONG).show()
+                },
+                onSaveParkingSpot = {},
+                onRemoveCarSpot = {},
+                onGetRoute = {},
+                isSaved = false,
+                type = MarkerType.PARKING_SPOT
             )
             Circle(
                 center = circleCenter,
@@ -105,7 +120,7 @@ fun GoogleMapView(
 
         }
 
-    }
+    //}
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -151,10 +166,10 @@ fun GoogleMapView(
                 MapButton(
                     text = "",
                     onClick = {
-                        mapProperties = mapProperties.copy(mapType = MapType.NORMAL)
-                        cameraPositionState.position = defaultCameraPosition
-                        singaporeState.position = singapore
-                        singaporeState.hideInfoWindow()
+//                        mapProperties = mapProperties.copy(mapType = MapType.NORMAL)
+//                        cameraPositionState.position = defaultCameraPosition
+//                        singaporeState.position = singapore
+//                        singaporeState.hideInfoWindow()
                     },
                     icon = Icons.Default.Search
                 )
@@ -172,6 +187,7 @@ fun GoogleMapView(
                 horizontalAlignment = Alignment.Start,
             ) {
                 SwitchButton(
+                    //mapProperties.copy(mapType = MapType.NORMAL)
                     onCheckedChange = {
 
                     },
