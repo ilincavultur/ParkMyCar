@@ -52,32 +52,19 @@ fun CustomMarker(
     markerClick: (Marker) -> Boolean,
     type: MarkerType,
     isSaved: Boolean,
-    onRemoveParkingSpot: () -> Unit,
-    onRemoveCarSpot: () -> Unit,
-    onSaveParkingSpot: () -> Unit,
-    onGetRoute: () -> Unit,
+    onInfoWindowLongClick: (Marker) -> Unit
 ) {
     MarkerInfoWindowContent(
         state = state,
         //title = title,
         icon = bitmapDescriptorFromVector(context = context, vectorResId = iconResourceId),
         onClick = markerClick,
-        onInfoWindowClick = {
-            Log.d(TAG, "CustomMarker: i clicked !")
-        }
+        onInfoWindowLongClick = onInfoWindowLongClick
     ) {
 
-//        if (it.isInfoWindowShown) {
-//            it.hideInfoWindow()
-//        } else {
-//            it.showInfoWindow()
-//        }
 
 
-        Button(onClick = onRemoveParkingSpot) {
-            // remove
-            Text(text = "remove")
-        }
+
 //        Surface {
 //            Column {
 //                when (type) {

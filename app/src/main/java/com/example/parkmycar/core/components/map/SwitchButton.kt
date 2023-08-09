@@ -67,6 +67,10 @@ fun SwitchButton(
                     onTap = {
                         // This is called when the user taps on the canvas
                         switchON.value = !switchON.value
+
+                        if (onCheckedChange != null) {
+                            onCheckedChange(switchON.value)
+                        }
                     }
                 )
             }

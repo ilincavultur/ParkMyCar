@@ -1,4 +1,8 @@
 package com.example.parkmycar.feature_map.domain.usecases
 
-class FindRouteToParkingLot {
+import com.example.parkmycar.feature_map.domain.repository.SpotRepository
+
+class FindRouteToParkingLot(
+    private val repository: SpotRepository
+) {
 }

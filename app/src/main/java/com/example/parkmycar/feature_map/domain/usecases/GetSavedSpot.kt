@@ -1,4 +1,8 @@
 package com.example.parkmycar.feature_map.domain.usecases
 
-class GetSavedSpot {
+import com.example.parkmycar.feature_map.domain.repository.SpotRepository
+
+class GetSavedSpot(
+    private val repository: SpotRepository
+) {
 }

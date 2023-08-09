@@ -15,7 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.parkmycar.core.components.AppScaffold
 import com.example.parkmycar.core.navigation.Navigation
 import com.example.parkmycar.ui.theme.ParkMyCarTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         //installSplashScreen()

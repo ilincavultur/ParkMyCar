@@ -18,11 +18,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.parkmycar.R
 import com.example.parkmycar.feature_map.domain.models.MarkerType
-import com.example.parkmycar.feature_map.presentation.defaultCameraPosition
-import com.example.parkmycar.feature_map.presentation.singapore2
-import com.example.parkmycar.feature_map.presentation.singapore3
+import com.example.parkmycar.feature_map.domain.models.Spot
+import com.example.parkmycar.feature_map.presentation.*
 import com.example.parkmycar.ui.theme.ParkMyCarTheme
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -39,7 +39,8 @@ fun GoogleMapView(
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     onMapLoaded: () -> Unit = {},
-    content: @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
+    viewModel: MapViewModel
 ) {
     val localContext = LocalContext.current
     // all of these into the viewmodel
@@ -70,14 +71,21 @@ fun GoogleMapView(
             onMapLoaded = onMapLoaded,
             onPOIClick = {
                 Log.d(TAG, "POI clicked: ${it.name}")
+            },
+            onMapLongClick = { LatLng ->
+                viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
             }
         ) {
             // Drawing on the map is accomplished with a child-based API
-            val markerClick: (Marker) -> Boolean = {
-                Log.d(TAG, "${it.title} was clicked")
-                cameraPositionState.projection?.let { projection ->
-                    Log.d(TAG, "The current projection is: $projection")
-                }
+            val markerClick: (Marker) -> Boolean = { marker ->
+                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
+                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+                )))
+                //viewModel.onEvent(MapEvent.OnMarkerLongClick(LatLng))
+//                Log.d(TAG, "${it.title} was clicked")
+//                cameraPositionState.projection?.let { projection ->
+//                    Log.d(TAG, "The current projection is: $projection")
+//                }
                 false
             }
 
@@ -100,14 +108,13 @@ fun GoogleMapView(
                 state = singaporeState,
                 iconResourceId = R.drawable.ic_baseline_local_parking_24,
                 markerClick = markerClick,
-                onRemoveParkingSpot = {
-                                      Toast.makeText(localContext, "Hey i m here", Toast.LENGTH_LONG).show()
-                },
-                onSaveParkingSpot = {},
-                onRemoveCarSpot = {},
-                onGetRoute = {},
                 isSaved = false,
-                type = MarkerType.PARKING_SPOT
+                type = MarkerType.PARKING_SPOT,
+                onInfoWindowLongClick = { marker ->
+                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
+                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+                    )))
+                }
             )
             Circle(
                 center = circleCenter,
@@ -139,23 +146,25 @@ fun GoogleMapView(
                 val coroutineScope = rememberCoroutineScope()
                 ZoomControls(
                     onZoomOut = {
-                        if (shouldAnimateZoom) {
-                            coroutineScope.launch {
-                                cameraPositionState.animate(CameraUpdateFactory.zoomOut())
-                            }
-                        } else {
-                            cameraPositionState.move(CameraUpdateFactory.zoomOut())
-                        }
+                        viewModel.onEvent(MapEvent.OnZoomOutClick)
+//                        if (shouldAnimateZoom) {
+//                            coroutineScope.launch {
+//                                cameraPositionState.animate(CameraUpdateFactory.zoomOut())
+//                            }
+//                        } else {
+//                            cameraPositionState.move(CameraUpdateFactory.zoomOut())
+//                        }
                     },
                     onZoomIn = {
-                        if (shouldAnimateZoom) {
-                            coroutineScope.launch {
-                                cameraPositionState.animate(CameraUpdateFactory.zoomIn())
-                            }
-                        } else {
-                            cameraPositionState.move(CameraUpdateFactory.zoomIn())
-                        }
-                        ticker++
+                        viewModel.onEvent(MapEvent.OnZoomInClick)
+//                        if (shouldAnimateZoom) {
+//                            coroutineScope.launch {
+//                                cameraPositionState.animate(CameraUpdateFactory.zoomIn())
+//                            }
+//                        } else {
+//                            cameraPositionState.move(CameraUpdateFactory.zoomIn())
+//                        }
+//                        ticker++
                     }
                 )
             }
@@ -166,6 +175,7 @@ fun GoogleMapView(
                 MapButton(
                     text = "",
                     onClick = {
+                              viewModel.onEvent(MapEvent.OnSearchButtonClick)
 //                        mapProperties = mapProperties.copy(mapType = MapType.NORMAL)
 //                        cameraPositionState.position = defaultCameraPosition
 //                        singaporeState.position = singapore
@@ -189,7 +199,11 @@ fun GoogleMapView(
                 SwitchButton(
                     //mapProperties.copy(mapType = MapType.NORMAL)
                     onCheckedChange = {
-
+                        if (it) {
+                            viewModel.onEvent(MapEvent.OnShowParkingSpotsToggleClick)
+                        } else {
+                            viewModel.onEvent(MapEvent.OnHideParkingSpotsToggleClick)
+                        }
                     },
                     checkedTrackColor = Color(0xFF0029FF),
                     uncheckedTrackColor = Color(0x3E0029FF)
@@ -201,7 +215,11 @@ fun GoogleMapView(
             ) {
                 SwitchButton(
                     onCheckedChange = {
-
+                        if (it) {
+                            viewModel.onEvent(MapEvent.OnShowCarSpotsToggleClick)
+                        } else {
+                            viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick)
+                        }
                     },
                     checkedTrackColor = Color(0xFF673AB7),
                     uncheckedTrackColor = Color(0x3D673AB7)
@@ -261,10 +279,10 @@ private fun DebugView(
 }
 
 
-@Preview
-@Composable
-fun GoogleMapViewPreview() {
-    ParkMyCarTheme{
-        GoogleMapView(Modifier.fillMaxSize())
-    }
-}
+//@Preview
+//@Composable
+//fun GoogleMapViewPreview() {
+//    ParkMyCarTheme{
+//        GoogleMapView(Modifier.fillMaxSize())
+//    }
+//}
