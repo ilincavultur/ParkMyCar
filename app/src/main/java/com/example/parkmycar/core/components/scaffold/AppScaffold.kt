@@ -1,5 +1,6 @@
 package com.example.parkmycar.core.components
 
+import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -12,12 +13,14 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -32,6 +35,7 @@ import com.example.parkmycar.core.navigation.Screen
 fun  AppScaffold() {
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
+    val snackbarHost = rememberScaffoldState()
 
     val items : List<BottomNavigationItem> = listOf(
         BottomNavigationItem(
@@ -53,6 +57,9 @@ fun  AppScaffold() {
     val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHost.snackbarHostState)
+        },
         scaffoldState = scaffoldState,
         bottomBar = {
             if (navBackStackEntry?.destination?.route !in screensWithoutBottomBar) {
@@ -111,6 +118,6 @@ fun  AppScaffold() {
             }
         },
     ) { innerPadding ->
-        Navigation(navController = navController, innerPadding = innerPadding)
+        Navigation(navController = navController, innerPadding = innerPadding, snackbarHostState = snackbarHost.snackbarHostState)
     }
 }

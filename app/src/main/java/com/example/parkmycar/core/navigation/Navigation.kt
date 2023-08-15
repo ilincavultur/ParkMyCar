@@ -1,7 +1,9 @@
 package com.example.parkmycar.core.navigation
 
+import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -16,7 +18,8 @@ import com.example.parkmycar.feature_splash_screen.presentation.SplashScreen
 @Composable
 fun Navigation(
     navController: NavHostController,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    snackbarHostState: SnackbarHostState
 ) {
    NavHost(navController = navController, startDestination = Screen.SplashScreen.route, Modifier.padding(innerPadding)) {
        composable(route = Screen.SplashScreen.route) {
@@ -24,7 +27,7 @@ fun Navigation(
        }
 
        composable(route = Screen.MapScreen.route) {
-           MapScreen(navController = navController)
+           MapScreen(navController = navController, snackbarHostState = snackbarHostState)
        }
 
        composable(route = Screen.SavedCarSpotsScreen.route) {
