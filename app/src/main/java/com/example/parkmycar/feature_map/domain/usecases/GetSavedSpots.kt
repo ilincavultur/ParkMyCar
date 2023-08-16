@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 class GetSavedSpots(
     private val repository: SpotRepository
 ) {
-    suspend operator fun invoke() : Flow<List<Spot>> {
+    suspend operator fun invoke() : Flow<Resource<List<Spot>>> {
         return repository.getSpots()
     }
 }

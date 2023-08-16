@@ -39,7 +39,7 @@ fun GoogleMapView(
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     onMapLoaded: () -> Unit = {},
-    content: @Composable (List<Spot>) -> Unit = {},
+    content: @Composable () -> Unit = {},
     viewModel: MapViewModel
 ) {
     val localContext = LocalContext.current
@@ -61,51 +61,63 @@ fun GoogleMapView(
         mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
 
-//        GoogleMap(
-//            modifier = modifier,
-//            cameraPositionState = cameraPositionState,
-//            properties = mapProperties,
-//            uiSettings = uiSettings,
-//            onMapLoaded = onMapLoaded,
-//            onPOIClick = {
-//                Log.d(TAG, "POI clicked: ${it.name}")
-//            },
-//            onMapLongClick = { LatLng ->
-//                viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
+    GoogleMap(
+        modifier = modifier,
+        cameraPositionState = cameraPositionState,
+        properties = mapProperties,
+        uiSettings = uiSettings,
+        onMapLoaded = onMapLoaded,
+        onPOIClick = {
+            Log.d(TAG, "POI clicked: ${it.name}")
+        },
+        onMapLongClick = { LatLng ->
+            viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
+        }
+    ) {
+//            val markerClick: (Marker) -> Boolean = { marker ->
+//                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
+//                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+//                )))
+//                false
 //            }
-//        ) {
-//            content(viewModel.state.spots)
-//
-////            val markerClick: (Marker) -> Boolean = { marker ->
-////                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
-////                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-////                )))
-////                false
-////            }
-//
-////            CustomMarker(
-////                context = localContext,
-////                state = singaporeState,
-////                iconResourceId = R.drawable.ic_baseline_local_parking_24,
-////                markerClick = markerClick,
-////                isSaved = false,
-////                type = MarkerType.PARKING_SPOT,
-////                onInfoWindowLongClick = { marker ->
-////                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
-////                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-////                    )))
-////                }
-////            )
-//
-//
-//            viewModel.state.spots.forEach {
-//                Log.d(TAG, "GoogleMapView: spot: " + it.lat)
-//            }
-//
-//
-//
-//
-//        }
+
+//            CustomMarker(
+//                context = localContext,
+//                state = singaporeState,
+//                iconResourceId = R.drawable.ic_baseline_local_parking_24,
+//                markerClick = markerClick,
+//                isSaved = false,
+//                type = MarkerType.PARKING_SPOT,
+//                onInfoWindowLongClick = { marker ->
+//                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
+//                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+//                    )))
+//                }
+//            )
+
+
+        viewModel.state.value.spots.forEach { spot ->
+            Log.d(TAG, "MapScreen: i am here")
+            Marker(
+                state = MarkerState(LatLng(spot.lat, spot.lng)),
+                title = "Parking spot (${spot.lat}, ${spot.lng})",
+                snippet = "Long click to delete",
+                onInfoWindowLongClick = {
+                    viewModel.onEvent(
+                        MapEvent.OnInfoWindowLongClick(spot)
+                    )
+                },
+                onClick = {
+                    it.showInfoWindow()
+                    true
+                },
+                icon = BitmapDescriptorFactory.defaultMarker(
+                    BitmapDescriptorFactory.HUE_GREEN
+                )
+            )
+        }
+        content()
+    }
 
     Column(
         modifier = Modifier

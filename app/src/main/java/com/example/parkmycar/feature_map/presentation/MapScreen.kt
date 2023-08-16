@@ -73,10 +73,6 @@ fun MapScreen(
     snackbarHostState: SnackbarHostState,
 ) {
     val state = viewModel.state.value
-
-
-
-
     val localContext = LocalContext.current
     val multiplePermissionResultLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -103,13 +99,6 @@ fun MapScreen(
         }
     }
 
-    var mapProperties by remember {
-        mutableStateOf(MapProperties(mapType = MapType.NORMAL))
-    }
-    var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = false)) }
-    var shouldAnimateZoom by remember { mutableStateOf(true) }
-    var ticker by remember { mutableStateOf(0) }
-
     if (state.permissionsGranted) {
         //var isMapLoaded by remember { mutableStateOf(state.isMapLoaded) }
         //var isMapLoaded by remember { mutableStateOf(false) }
@@ -119,97 +108,15 @@ fun MapScreen(
         }
 
         Box(Modifier.fillMaxSize()) {
-//            GoogleMapView(
-//                modifier = Modifier.matchParentSize(),
-//                cameraPositionState = cameraPositionState,
-//                onMapLoaded = {
-//                    viewModel.onEvent(MapEvent.MapLoaded)
-//                },
-//                viewModel = viewModel,
-//                content = {
-//                    it.forEach { spot ->
-//                        Marker(
-//                            state = MarkerState(LatLng(spot.lat, spot.lng)),
-//                            title = "Parking spot (${spot.lat}, ${spot.lng})",
-//                            snippet = "Long click to delete",
-//                            onInfoWindowLongClick = {
-//                                viewModel.onEvent(
-//                                    MapEvent.OnInfoWindowLongClick(spot)
-//                                )
-//                            },
-//                            onClick = {
-//                                it.showInfoWindow()
-//                                true
-//                            },
-//                            icon = BitmapDescriptorFactory.defaultMarker(
-//                                BitmapDescriptorFactory.HUE_GREEN
-//                            )
-//                        )
-//                    }
-//                }
-//            )
-            GoogleMap(
-                modifier = Modifier,
+            GoogleMapView(
+                modifier = Modifier.matchParentSize(),
                 cameraPositionState = cameraPositionState,
-                properties = mapProperties,
-                uiSettings = uiSettings,
-                onMapLoaded = { viewModel.onEvent(MapEvent.MapLoaded) },
-                onPOIClick = {
-                    Log.d(TAG, "POI clicked: ${it.name}")
+                onMapLoaded = {
+                    viewModel.onEvent(MapEvent.MapLoaded)
                 },
-                onMapLongClick = { LatLng ->
-                    viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
-                }
-            ) {
+                viewModel = viewModel
+            )
 
-
-//            val markerClick: (Marker) -> Boolean = { marker ->
-//                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
-//                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-//                )))
-//                false
-//            }
-
-//            CustomMarker(
-//                context = localContext,
-//                state = singaporeState,
-//                iconResourceId = R.drawable.ic_baseline_local_parking_24,
-//                markerClick = markerClick,
-//                isSaved = false,
-//                type = MarkerType.PARKING_SPOT,
-//                onInfoWindowLongClick = { marker ->
-//                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
-//                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-//                    )))
-//                }
-//            )
-
-
-                state.spots.forEach { spot ->
-                    Log.d(TAG, "MapScreen: i am here")
-                    Marker(
-                        state = MarkerState(LatLng(spot.lat, spot.lng)),
-                        title = "Parking spot (${spot.lat}, ${spot.lng})",
-                        snippet = "Long click to delete",
-                        onInfoWindowLongClick = {
-                            viewModel.onEvent(
-                                MapEvent.OnInfoWindowLongClick(spot)
-                            )
-                        },
-                        onClick = {
-                            it.showInfoWindow()
-                            true
-                        },
-                        icon = BitmapDescriptorFactory.defaultMarker(
-                            BitmapDescriptorFactory.HUE_GREEN
-                        )
-                    )
-                }
-
-
-
-
-            }
             if (!state.isMapLoaded) {
                 AnimatedVisibility(
                     modifier = Modifier

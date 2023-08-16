@@ -24,42 +24,31 @@ class SpotRepositoryImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getSpots(): Flow<List<Spot>> {
-//        emit(Resource.Loading())
-//
-//        val spots = dao.getSpots().map {
-//            it.toSpot()
-//        }
-//
-//        emit(Resource.Loading(data = spots))
-//
-//        try {
-//            val remoteSpots = dao.getSpots()
-//            dao.deleteSpots(remoteSpots.map {
-//                it.id ?: 0
-//            })
-//            dao.insertSpots(remoteSpots)
-//        } catch (e: HttpException) {
-//            emit(Resource.Error(message = "Ooops something went wrong", data = spots))
-//        } catch (e: IOException) {
-//            emit(Resource.Error(message = "Check internet connection", data = spots))
-//        }
-//
-//        val newSpots = dao.getSpots().map {
-//            it.toSpot()
-//        }
-//
-//        newSpots.forEach {
-//            Log.d(TAG, "getSpots: spot: lat lng " + it.lat + " " + it.lng)
-//        }
-//        emit(Resource.Success(newSpots))
+    override fun getSpots(): Flow<Resource<List<Spot>>> = flow {
+        emit(Resource.Loading())
 
-        return dao.getSpots().map {
-            it.map {
-                it.toSpot()
-            }
+        val spots = dao.getSpots().map {
+            it.toSpot()
         }
 
+        emit(Resource.Loading(data = spots))
+
+        try {
+            val remoteSpots = dao.getSpots()
+            dao.deleteSpots(remoteSpots.map {
+                it.id ?: 0
+            })
+            dao.insertSpots(remoteSpots)
+        } catch (e: HttpException) {
+            emit(Resource.Error(message = "Ooops something went wrong", data = spots))
+        } catch (e: IOException) {
+            emit(Resource.Error(message = "Check internet connection", data = spots))
+        }
+
+        val newSpots = dao.getSpots().map {
+            it.toSpot()
+        }
+        emit(Resource.Success(newSpots))
     }
 
 }

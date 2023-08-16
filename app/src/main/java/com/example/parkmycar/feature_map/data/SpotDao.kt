@@ -1,6 +1,7 @@
 package com.example.parkmycar.feature_map.data
 
 import androidx.room.*
+import com.example.parkmycar.core.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,5 +19,5 @@ interface SpotDao {
     suspend fun deleteSpots(spotIds: List<Int>)
 
     @Query("SELECT * FROM spot_entity")
-    fun getSpots(): Flow<List<SpotEntity>>
+    suspend fun getSpots(): List<SpotEntity>
 }
