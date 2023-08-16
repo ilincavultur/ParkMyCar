@@ -38,9 +38,12 @@ import com.example.parkmycar.core.components.map.GoogleMapView
 import com.example.parkmycar.core.components.permission.CoarseLocationPermissionTextProvider
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
+import com.example.parkmycar.feature_map.domain.models.Spot
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collectLatest
 
 val singapore = LatLng(1.3588227, 103.8742114)
@@ -70,6 +73,10 @@ fun MapScreen(
     snackbarHostState: SnackbarHostState,
 ) {
     val state = viewModel.state.value
+
+
+
+
     val localContext = LocalContext.current
     val multiplePermissionResultLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -83,6 +90,26 @@ fun MapScreen(
         }
     )
 
+    LaunchedEffect(key1 = true) {
+        viewModel.eventFlow.collectLatest { event ->
+            when(event) {
+                is MapUiEvent.LaunchPermissionLauncher -> TODO()
+                is MapUiEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message
+                    )
+                }
+            }
+        }
+    }
+
+    var mapProperties by remember {
+        mutableStateOf(MapProperties(mapType = MapType.NORMAL))
+    }
+    var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = false)) }
+    var shouldAnimateZoom by remember { mutableStateOf(true) }
+    var ticker by remember { mutableStateOf(0) }
+
     if (state.permissionsGranted) {
         //var isMapLoaded by remember { mutableStateOf(state.isMapLoaded) }
         //var isMapLoaded by remember { mutableStateOf(false) }
@@ -92,14 +119,97 @@ fun MapScreen(
         }
 
         Box(Modifier.fillMaxSize()) {
-            GoogleMapView(
-                modifier = Modifier.matchParentSize(),
+//            GoogleMapView(
+//                modifier = Modifier.matchParentSize(),
+//                cameraPositionState = cameraPositionState,
+//                onMapLoaded = {
+//                    viewModel.onEvent(MapEvent.MapLoaded)
+//                },
+//                viewModel = viewModel,
+//                content = {
+//                    it.forEach { spot ->
+//                        Marker(
+//                            state = MarkerState(LatLng(spot.lat, spot.lng)),
+//                            title = "Parking spot (${spot.lat}, ${spot.lng})",
+//                            snippet = "Long click to delete",
+//                            onInfoWindowLongClick = {
+//                                viewModel.onEvent(
+//                                    MapEvent.OnInfoWindowLongClick(spot)
+//                                )
+//                            },
+//                            onClick = {
+//                                it.showInfoWindow()
+//                                true
+//                            },
+//                            icon = BitmapDescriptorFactory.defaultMarker(
+//                                BitmapDescriptorFactory.HUE_GREEN
+//                            )
+//                        )
+//                    }
+//                }
+//            )
+            GoogleMap(
+                modifier = Modifier,
                 cameraPositionState = cameraPositionState,
-                onMapLoaded = {
-                    viewModel.onEvent(MapEvent.MapLoaded)
+                properties = mapProperties,
+                uiSettings = uiSettings,
+                onMapLoaded = { viewModel.onEvent(MapEvent.MapLoaded) },
+                onPOIClick = {
+                    Log.d(TAG, "POI clicked: ${it.name}")
                 },
-                viewModel = viewModel
-            )
+                onMapLongClick = { LatLng ->
+                    viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
+                }
+            ) {
+
+
+//            val markerClick: (Marker) -> Boolean = { marker ->
+//                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
+//                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+//                )))
+//                false
+//            }
+
+//            CustomMarker(
+//                context = localContext,
+//                state = singaporeState,
+//                iconResourceId = R.drawable.ic_baseline_local_parking_24,
+//                markerClick = markerClick,
+//                isSaved = false,
+//                type = MarkerType.PARKING_SPOT,
+//                onInfoWindowLongClick = { marker ->
+//                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
+//                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+//                    )))
+//                }
+//            )
+
+
+                state.spots.forEach { spot ->
+                    Log.d(TAG, "MapScreen: i am here")
+                    Marker(
+                        state = MarkerState(LatLng(spot.lat, spot.lng)),
+                        title = "Parking spot (${spot.lat}, ${spot.lng})",
+                        snippet = "Long click to delete",
+                        onInfoWindowLongClick = {
+                            viewModel.onEvent(
+                                MapEvent.OnInfoWindowLongClick(spot)
+                            )
+                        },
+                        onClick = {
+                            it.showInfoWindow()
+                            true
+                        },
+                        icon = BitmapDescriptorFactory.defaultMarker(
+                            BitmapDescriptorFactory.HUE_GREEN
+                        )
+                    )
+                }
+
+
+
+
+            }
             if (!state.isMapLoaded) {
                 AnimatedVisibility(
                     modifier = Modifier

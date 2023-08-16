@@ -2,16 +2,18 @@ package com.example.parkmycar.feature_map.presentation
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.parkmycar.core.util.Resource
+import com.example.parkmycar.feature_map.domain.models.MarkerType
+import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,13 +28,80 @@ class MapViewModel @Inject constructor(
     private val _state = mutableStateOf(MapState())
     val state: State<MapState> = _state
 
-//    init {
-//        viewModelScope.launch {
-//            _eventFlow.emit(
-//                MapUiEvent.LaunchPermissionLauncher("hahahhaahha")
-//            )
-//        }
-//    }
+    //var state by mutableStateOf(MapState())
+
+    private var searchJob: Job? = null
+
+    init {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            parkingUseCases.getSavedSpots()
+//                .collectLatest { result ->
+//                when (result) {
+//                    is Resource.Error -> {
+//                        _state.value = state.value.copy(
+//                            spots = result.data ?: emptyList(),
+//                            isLoading = false
+//                        )
+//                        _eventFlow.emit(
+//                            MapUiEvent.ShowSnackbar(
+//                                result.message ?: "Unknown Error"
+//                            )
+//                        )
+//                    }
+//                    is Resource.Loading -> {
+//                        _state.value = state.value.copy(
+//                            spots = result.data ?: emptyList(),
+//                            isLoading = true
+//                        )
+//                    }
+//                    is Resource.Success -> {
+//                        _state.value = state.value.copy(
+//                            spots = result.data ?: emptyList(),
+//                            isLoading = false
+//                        )
+//
+//                        _eventFlow.emit(
+//                            MapUiEvent.ShowSnackbar(
+//                                "we are here" ?: "Unknown Error"
+//                            )
+//                        )
+//                    }
+//                }
+//            }
+                .onEach { result ->
+                    _state.value = state.value.copy(
+                        spots = result ?: emptyList(),
+                        isLoading = false
+                    )
+//                    when (result) {
+//                        is Resource.Error -> {
+//                            _state.value = state.value.copy(
+//                                spots = result.data ?: emptyList(),
+//                                isLoading = false
+//                            )
+//                            _eventFlow.emit(
+//                                MapUiEvent.ShowSnackbar(
+//                                    result.message ?: "Unknown Error"
+//                                )
+//                            )
+//                        }
+//                        is Resource.Loading -> {
+//                            _state.value = state.value.copy(
+//                                spots = result.data ?: emptyList(),
+//                                isLoading = true
+//                            )
+//                        }
+//                        is Resource.Success -> {
+//                            _state.value = state.value.copy(
+//                                spots = result.data ?: emptyList(),
+//                                isLoading = false
+//                            )
+//                        }
+//                    }
+                }.launchIn(this)
+        }
+    }
 
     fun onEvent(event: MapEvent) {
         when (event) {
@@ -41,6 +110,15 @@ class MapViewModel @Inject constructor(
             }
             is MapEvent.OnMapLongClick -> {
                 Log.d(TAG, "onEvent: OnMapLongClick")
+                viewModelScope.launch {
+                    parkingUseCases.saveSpot(
+                        Spot(
+                            event.latLng.latitude,
+                            event.latLng.longitude,
+                            MarkerType.CAR_SPOT
+                        )
+                    )
+                }
             }
             is MapEvent.OnMarkerLongClick -> {
                 Log.d(TAG, "onEvent: OnMarkerLongClick")
@@ -80,7 +158,7 @@ class MapViewModel @Inject constructor(
                 _state.value.visiblePermissionDialogQueue.removeFirst()
             }
             is MapEvent.OnPermissionDialogResult -> {
-                if(!event.isGranted && !state.value.visiblePermissionDialogQueue.contains(event.permission)) {
+                if (!event.isGranted && !state.value.visiblePermissionDialogQueue.contains(event.permission)) {
                     _state.value.visiblePermissionDialogQueue.add(event.permission)
                 }
                 if (event.isGranted) {

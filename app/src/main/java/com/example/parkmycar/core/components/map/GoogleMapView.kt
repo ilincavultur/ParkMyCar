@@ -39,7 +39,7 @@ fun GoogleMapView(
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     onMapLoaded: () -> Unit = {},
-    content: @Composable () -> Unit = {},
+    content: @Composable (List<Spot>) -> Unit = {},
     viewModel: MapViewModel
 ) {
     val localContext = LocalContext.current
@@ -60,74 +60,53 @@ fun GoogleMapView(
     var mapProperties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
-    //var mapVisible by remember { mutableStateOf(true) }
 
-    //if (mapVisible) {
-        GoogleMap(
-            modifier = modifier,
-            cameraPositionState = cameraPositionState,
-            properties = mapProperties,
-            uiSettings = uiSettings,
-            onMapLoaded = onMapLoaded,
-            onPOIClick = {
-                Log.d(TAG, "POI clicked: ${it.name}")
-            },
-            onMapLongClick = { LatLng ->
-                viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
-            }
-        ) {
-            // Drawing on the map is accomplished with a child-based API
-            val markerClick: (Marker) -> Boolean = { marker ->
-                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
-                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-                )))
-                //viewModel.onEvent(MapEvent.OnMarkerLongClick(LatLng))
-//                Log.d(TAG, "${it.title} was clicked")
-//                cameraPositionState.projection?.let { projection ->
-//                    Log.d(TAG, "The current projection is: $projection")
-//                }
-                false
-            }
-
-//            MarkerInfoWindowContent(
-//                state = singapore2State,
-//                title = "Marker with custom info window.\nZoom in has been tapped $ticker times.",
-//                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
-//                onClick = markerClick,
-//            ) {
-//                Text(it.title ?: "Title", color = Color.Blue)
+//        GoogleMap(
+//            modifier = modifier,
+//            cameraPositionState = cameraPositionState,
+//            properties = mapProperties,
+//            uiSettings = uiSettings,
+//            onMapLoaded = onMapLoaded,
+//            onPOIClick = {
+//                Log.d(TAG, "POI clicked: ${it.name}")
+//            },
+//            onMapLongClick = { LatLng ->
+//                viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
 //            }
+//        ) {
+//            content(viewModel.state.spots)
+//
+////            val markerClick: (Marker) -> Boolean = { marker ->
+////                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
+////                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+////                )))
+////                false
+////            }
+//
+////            CustomMarker(
+////                context = localContext,
+////                state = singaporeState,
+////                iconResourceId = R.drawable.ic_baseline_local_parking_24,
+////                markerClick = markerClick,
+////                isSaved = false,
+////                type = MarkerType.PARKING_SPOT,
+////                onInfoWindowLongClick = { marker ->
+////                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
+////                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
+////                    )))
+////                }
+////            )
+//
+//
+//            viewModel.state.spots.forEach {
+//                Log.d(TAG, "GoogleMapView: spot: " + it.lat)
+//            }
+//
+//
+//
+//
+//        }
 
-//            CustomMarkerInfoWindow(
-//                state = singapore3State,
-//                title = "Hehehehhehe",
-//            )
-
-            CustomMarker(
-                context = localContext,
-                state = singaporeState,
-                iconResourceId = R.drawable.ic_baseline_local_parking_24,
-                markerClick = markerClick,
-                isSaved = false,
-                type = MarkerType.PARKING_SPOT,
-                onInfoWindowLongClick = { marker ->
-                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
-                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-                    )))
-                }
-            )
-            Circle(
-                center = circleCenter,
-                fillColor = MaterialTheme.colors.secondary,
-                strokeColor = MaterialTheme.colors.secondaryVariant,
-                radius = 1000.0,
-            )
-
-            content()
-
-        }
-
-    //}
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -147,24 +126,9 @@ fun GoogleMapView(
                 ZoomControls(
                     onZoomOut = {
                         viewModel.onEvent(MapEvent.OnZoomOutClick)
-//                        if (shouldAnimateZoom) {
-//                            coroutineScope.launch {
-//                                cameraPositionState.animate(CameraUpdateFactory.zoomOut())
-//                            }
-//                        } else {
-//                            cameraPositionState.move(CameraUpdateFactory.zoomOut())
-//                        }
                     },
                     onZoomIn = {
                         viewModel.onEvent(MapEvent.OnZoomInClick)
-//                        if (shouldAnimateZoom) {
-//                            coroutineScope.launch {
-//                                cameraPositionState.animate(CameraUpdateFactory.zoomIn())
-//                            }
-//                        } else {
-//                            cameraPositionState.move(CameraUpdateFactory.zoomIn())
-//                        }
-//                        ticker++
                     }
                 )
             }

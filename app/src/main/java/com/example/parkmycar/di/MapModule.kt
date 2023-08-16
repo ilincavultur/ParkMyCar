@@ -1,8 +1,6 @@
 package com.example.parkmycar.di
 
-import android.app.Application
 import android.content.Context
-import androidx.room.Database
 import androidx.room.Room
 import com.example.parkmycar.core.util.SpotDatabase
 import com.example.parkmycar.feature_map.data.SpotRepositoryImpl
@@ -49,7 +47,8 @@ object MapModule {
             findParkingLot = FindParkingLot(repository),
             findRouteToParkingLot = FindRouteToParkingLot(repository),
             getSavedSpot = GetSavedSpot(repository),
-            savedSpot = SaveSpot(repository),
+            getSavedSpots = GetSavedSpots(repository),
+            saveSpot = SaveSpot(repository)
         )
     }
 }
