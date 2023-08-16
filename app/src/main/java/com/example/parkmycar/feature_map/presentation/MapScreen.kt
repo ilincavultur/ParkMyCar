@@ -54,19 +54,13 @@ private val permissionsToRequest = arrayOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
 )
 
-fun AppCompatActivity.openAppSettings() {
-    Intent(
-        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-        Uri.fromParts("package", packageName, null)
-    ).also {
-        startActivity(it)
+internal fun Context.findActivity(): Activity {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
     }
-}
-
-fun Context.getActivity(): AppCompatActivity? = when (this) {
-    is AppCompatActivity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
+    throw IllegalStateException("Permissions should be called in the context of an Activity")
 }
 
 @Composable
@@ -88,24 +82,6 @@ fun MapScreen(
             }
         }
     )
-//    LaunchedEffect(snackbarHostState) {
-//        viewModel.eventFlow.collectLatest { event ->
-//            when(event) {
-//                is MapUiEvent.LaunchPermissionLauncher -> {
-//                    Log.d(TAG, "MapScreen: event.message launcher " + event.message)
-//                    snackbarHostState.showSnackbar(event.message, "asdasd", SnackbarDuration.Long)
-//                    multiplePermissionResultLauncher.launch(permissionsToRequest)
-//                }
-//                is MapUiEvent.ShowSnackbar -> {
-//                    //todo
-//                }
-////                is MapUiEvent.MapIsLoaded -> {
-////                    viewModel.onEvent(MapEvent.MapLoaded)
-////                }
-//            }
-//        }
-//    }
-
 
     if (state.permissionsGranted) {
         //var isMapLoaded by remember { mutableStateOf(state.isMapLoaded) }
@@ -143,14 +119,12 @@ fun MapScreen(
     } else {
         LaunchedEffect(multiplePermissionResultLauncher) {
             multiplePermissionResultLauncher.launch(permissionsToRequest)
-
         }
     }
 
     state.visiblePermissionDialogQueue
         .reversed()
         .forEach { permission ->
-
                 CustomPermissionDialog(
                     permissionTextProvider = when (permission) {
                         Manifest.permission.ACCESS_FINE_LOCATION -> {
@@ -161,46 +135,26 @@ fun MapScreen(
                         }
                         else -> return@forEach
                     },
-//                    isPermanentlyDeclined = !shouldShowRequestPermissionRationale(
-//                        context.getActivity()!!.parent, permission
+                    isPermanentlyDeclined = !shouldShowRequestPermissionRationale(
+                        localContext.findActivity(), permission
+                    ),
+//                    !shouldShowRequestPermissionRationale(
+//                        localContext as Activity, permission
 //                    ),
-                    isPermanentlyDeclined = localContext.getActivity()?.let {
-                        !shouldShowRequestPermissionRationale(
-                            it.parent, permission
-                        )
-                    } ?: false,
                     onDismiss = { viewModel.onEvent(MapEvent.OnPermissionDialogDismiss) },
                     onOkClick = {
                         viewModel.onEvent(MapEvent.OnPermissionDialogDismiss)
-
                         multiplePermissionResultLauncher.launch(
                             arrayOf(permission)
                         )
-
                     },
                     onGoToAppSettingsClick = {
-                        // on below line we are opening our intent
-                        // for wireless settings screen.
-                        val i = Intent(ACTION_WIRELESS_SETTINGS)
+                        val i = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", localContext.packageName, null)
+                        )
                         localContext.startActivity(i)
                     }
                 )
-
         }
-
-
-
-
-//    if (ActivityCompat.checkSelfPermission(
-//            localContext,
-//            Manifest.permission.ACCESS_FINE_LOCATION
-//        ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//            localContext,
-//            Manifest.permission.ACCESS_COARSE_LOCATION
-//        ) == PackageManager.PERMISSION_GRANTED
-//    ) {
-
-//    } else {
-//        //
-//    }
 }
