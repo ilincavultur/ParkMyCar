@@ -21,7 +21,7 @@ class SpotRepositoryImpl(
     }
 
     override suspend fun deleteSpot(spot: Spot) {
-        TODO("Not yet implemented")
+        dao.deleteSpot(spot = spot.toSpotEntity())
     }
 
     override fun getSpots(): Flow<Resource<List<Spot>>> = flow {

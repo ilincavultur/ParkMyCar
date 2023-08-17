@@ -48,7 +48,8 @@ object MapModule {
             findRouteToParkingLot = FindRouteToParkingLot(repository),
             getSavedSpot = GetSavedSpot(repository),
             getSavedSpots = GetSavedSpots(repository),
-            saveSpot = SaveSpot(repository)
+            saveSpot = SaveSpot(repository),
+            deleteSpotFromDb = DeleteSpotFromDb(repository)
         )
     }
 }

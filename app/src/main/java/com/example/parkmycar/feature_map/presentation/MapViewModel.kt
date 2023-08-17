@@ -12,9 +12,9 @@ import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,16 +44,20 @@ class MapViewModel @Inject constructor(
                 viewModelScope.launch {
                     parkingUseCases.saveSpot(
                         Spot(
-                            event.latLng.latitude,
-                            event.latLng.longitude,
-                            MarkerType.CAR_SPOT
+                            lat = event.latLng.latitude,
+                            lng = event.latLng.longitude,
+                            type = MarkerType.CAR_SPOT
                         )
                     )
                     loadMarkers()
                 }
             }
-            is MapEvent.OnMarkerLongClick -> {
+            is MapEvent.OnInfoWindowClick -> {
                 Log.d(TAG, "onEvent: OnMarkerLongClick")
+                _state.value = state.value.copy(
+                    isAlertDialogDisplayed = true,
+                    spotToBeDeleted = event.spot
+                )
             }
             MapEvent.MapLoaded -> {
                 if (state.value.permissionsGranted) {
@@ -87,9 +91,11 @@ class MapViewModel @Inject constructor(
                 Log.d(TAG, "onEvent: OnMarkerClick")
             }
             is MapEvent.OnPermissionDialogDismiss -> {
+                Log.d(TAG, "onEvent: OnPermissionDialogDismiss")
                 _state.value.visiblePermissionDialogQueue.removeFirst()
             }
             is MapEvent.OnPermissionDialogResult -> {
+                Log.d(TAG, "onEvent: OnPermissionDialogResult")
                 if (!event.isGranted && !state.value.visiblePermissionDialogQueue.contains(event.permission)) {
                     _state.value.visiblePermissionDialogQueue.add(event.permission)
                 }
@@ -100,6 +106,30 @@ class MapViewModel @Inject constructor(
                         permissionsGranted = true
                     )
                 }
+            }
+            is MapEvent.RemoveMarkerFromDb -> {
+                Log.d(TAG, "onEvent: RemoveMarkerFromDb")
+                viewModelScope.launch {
+                    parkingUseCases.deleteSpotFromDb(
+                        event.spot
+                    )
+                    loadMarkers()
+                    withContext(Dispatchers.Main) {
+                        _state.value = state.value.copy(
+                            isAlertDialogDisplayed = false,
+                        )
+                    }
+                }
+
+            }
+            is MapEvent.RemoveMarkerFromMap -> {
+                Log.d(TAG, "onEvent: RemoveMarkerFromMap")
+            }
+            MapEvent.OnDismissRemoveMarkerFromDbClick -> {
+                Log.d(TAG, "onEvent: OnDismissRemoveMarkerFromDbClick")
+                _state.value = state.value.copy(
+                    isAlertDialogDisplayed = false,
+                )
             }
         }
     }

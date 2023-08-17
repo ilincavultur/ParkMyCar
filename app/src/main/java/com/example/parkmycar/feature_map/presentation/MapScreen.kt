@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.parkmycar.MainActivity
 import com.example.parkmycar.core.components.map.GoogleMapView
+import com.example.parkmycar.core.components.map.RemoveFromDbDialog
 import com.example.parkmycar.core.components.permission.CoarseLocationPermissionTextProvider
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
@@ -114,7 +115,68 @@ fun MapScreen(
                 onMapLoaded = {
                     viewModel.onEvent(MapEvent.MapLoaded)
                 },
-                viewModel = viewModel
+                onMapLongClick = { latLng ->
+                    viewModel.onEvent(MapEvent.OnMapLongClick(latLng))
+                },
+                onZoomOutClick = {
+                    viewModel.onEvent(MapEvent.OnZoomOutClick)
+                },
+                onZoomInClick = {
+                    viewModel.onEvent(MapEvent.OnZoomInClick)
+                },
+                onSearchIconClick = {
+                    viewModel.onEvent(MapEvent.OnSearchButtonClick)
+                },
+                onShowParkingSpotsToggleClick = {
+                    viewModel.onEvent(MapEvent.OnShowParkingSpotsToggleClick)
+                },
+                onHideParkingSpotsToggleClick = {
+                    viewModel.onEvent(MapEvent.OnHideParkingSpotsToggleClick)
+                },
+                onShowCarSpotsToggleClick = {
+                    viewModel.onEvent(MapEvent.OnShowCarSpotsToggleClick)
+                },
+                onHideCarSpotsToggleClick = {
+                    viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick)
+                },
+                content = {
+                    viewModel.state.value.spots.forEach { spot ->
+                        Marker(
+                            state = MarkerState(LatLng(spot.lat, spot.lng)),
+                            title = "Parking spot (${spot.lat}, ${spot.lng})",
+                            snippet = "Long click to delete",
+                            onInfoWindowClick = {
+                                viewModel.onEvent(
+                                    MapEvent.OnInfoWindowClick(spot)
+                                )
+                            },
+                            onInfoWindowLongClick = {
+                                viewModel.onEvent(
+                                    MapEvent.OnInfoWindowLongClick(spot)
+                                )
+                            },
+                            onClick = {
+                                it.showInfoWindow()
+                                true
+                            },
+                            icon = BitmapDescriptorFactory.defaultMarker(
+                                BitmapDescriptorFactory.HUE_GREEN
+                            )
+                        )
+                    }
+
+                    if (state.isAlertDialogDisplayed) {
+                        RemoveFromDbDialog(
+                            onConfirmButtonClick = {
+                                // remove from map and db
+                                viewModel.onEvent(MapEvent.RemoveMarkerFromDb(state.spotToBeDeleted))
+                            },
+                            onDismissButtonClick = {
+                                viewModel.onEvent(MapEvent.OnDismissRemoveMarkerFromDbClick)
+                            }
+                        )
+                    }
+                }
             )
 
             if (!state.isMapLoaded) {

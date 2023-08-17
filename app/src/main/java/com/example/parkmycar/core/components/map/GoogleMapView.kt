@@ -40,7 +40,15 @@ fun GoogleMapView(
     cameraPositionState: CameraPositionState = rememberCameraPositionState(),
     onMapLoaded: () -> Unit = {},
     content: @Composable () -> Unit = {},
-    viewModel: MapViewModel
+    onMapLongClick: (LatLng) -> Unit,
+    onZoomOutClick: () -> Unit,
+    onZoomInClick: () -> Unit,
+    onSearchIconClick: () -> Unit,
+    onShowParkingSpotsToggleClick: () -> Unit,
+    onHideParkingSpotsToggleClick: () -> Unit,
+    onShowCarSpotsToggleClick: () -> Unit,
+    onHideCarSpotsToggleClick: () -> Unit,
+    //viewModel: MapViewModel
 ) {
     val localContext = LocalContext.current
     // all of these into the viewmodel
@@ -71,51 +79,9 @@ fun GoogleMapView(
             Log.d(TAG, "POI clicked: ${it.name}")
         },
         onMapLongClick = { LatLng ->
-            viewModel.onEvent(MapEvent.OnMapLongClick(LatLng))
+            onMapLongClick(LatLng)
         }
     ) {
-//            val markerClick: (Marker) -> Boolean = { marker ->
-//                viewModel.onEvent(MapEvent.OnMarkerClick(Spot(
-//                    marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-//                )))
-//                false
-//            }
-
-//            CustomMarker(
-//                context = localContext,
-//                state = singaporeState,
-//                iconResourceId = R.drawable.ic_baseline_local_parking_24,
-//                markerClick = markerClick,
-//                isSaved = false,
-//                type = MarkerType.PARKING_SPOT,
-//                onInfoWindowLongClick = { marker ->
-//                    viewModel.onEvent(MapEvent.OnMarkerLongClick(Spot(
-//                        marker.position.latitude, marker.position.longitude, MarkerType.PARKING_SPOT
-//                    )))
-//                }
-//            )
-
-
-        viewModel.state.value.spots.forEach { spot ->
-            Log.d(TAG, "MapScreen: i am here")
-            Marker(
-                state = MarkerState(LatLng(spot.lat, spot.lng)),
-                title = "Parking spot (${spot.lat}, ${spot.lng})",
-                snippet = "Long click to delete",
-                onInfoWindowLongClick = {
-                    viewModel.onEvent(
-                        MapEvent.OnInfoWindowLongClick(spot)
-                    )
-                },
-                onClick = {
-                    it.showInfoWindow()
-                    true
-                },
-                icon = BitmapDescriptorFactory.defaultMarker(
-                    BitmapDescriptorFactory.HUE_GREEN
-                )
-            )
-        }
         content()
     }
 
@@ -137,10 +103,10 @@ fun GoogleMapView(
                 val coroutineScope = rememberCoroutineScope()
                 ZoomControls(
                     onZoomOut = {
-                        viewModel.onEvent(MapEvent.OnZoomOutClick)
+                        onZoomOutClick()
                     },
                     onZoomIn = {
-                        viewModel.onEvent(MapEvent.OnZoomInClick)
+                        onZoomInClick()
                     }
                 )
             }
@@ -151,7 +117,8 @@ fun GoogleMapView(
                 MapButton(
                     text = "",
                     onClick = {
-                              viewModel.onEvent(MapEvent.OnSearchButtonClick)
+                        onSearchIconClick()
+                              //viewModel.onEvent(MapEvent.OnSearchButtonClick)
 //                        mapProperties = mapProperties.copy(mapType = MapType.NORMAL)
 //                        cameraPositionState.position = defaultCameraPosition
 //                        singaporeState.position = singapore
@@ -173,12 +140,11 @@ fun GoogleMapView(
                 horizontalAlignment = Alignment.Start,
             ) {
                 SwitchButton(
-                    //mapProperties.copy(mapType = MapType.NORMAL)
                     onCheckedChange = {
                         if (it) {
-                            viewModel.onEvent(MapEvent.OnShowParkingSpotsToggleClick)
+                            onShowParkingSpotsToggleClick()
                         } else {
-                            viewModel.onEvent(MapEvent.OnHideParkingSpotsToggleClick)
+                            onHideParkingSpotsToggleClick()
                         }
                     },
                     checkedTrackColor = Color(0xFF0029FF),
@@ -192,9 +158,9 @@ fun GoogleMapView(
                 SwitchButton(
                     onCheckedChange = {
                         if (it) {
-                            viewModel.onEvent(MapEvent.OnShowCarSpotsToggleClick)
+                            onShowCarSpotsToggleClick()
                         } else {
-                            viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick)
+                            onHideCarSpotsToggleClick()
                         }
                     },
                     checkedTrackColor = Color(0xFF673AB7),
