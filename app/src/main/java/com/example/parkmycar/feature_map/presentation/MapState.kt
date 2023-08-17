@@ -14,4 +14,5 @@ data class MapState(
     var isAlertDialogDisplayed: Boolean = false,
     var spotToBeDeleted: Spot = Spot(id = null,0.0,0.0,MarkerType.CAR_SPOT),
     var isMarkerControlDialogDisplayed: Boolean = false,
+    var spotToBeControlled: Spot = Spot(id = null,0.0,0.0,MarkerType.CAR_SPOT),
 )

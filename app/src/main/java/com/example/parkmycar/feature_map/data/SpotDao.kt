@@ -20,4 +20,7 @@ interface SpotDao {
 
     @Query("SELECT * FROM spot_entity")
     suspend fun getSpots(): List<SpotEntity>
+
+    @Query("SELECT EXISTS (SELECT 1 FROM spot_entity WHERE id = :id)")
+    suspend fun exists(id: Int): Boolean
 }

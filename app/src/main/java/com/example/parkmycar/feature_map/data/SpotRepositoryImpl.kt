@@ -51,4 +51,8 @@ class SpotRepositoryImpl(
         emit(Resource.Success(newSpots))
     }
 
+    override suspend fun exists(id: Int): Boolean {
+        return dao.exists(id)
+    }
+
 }

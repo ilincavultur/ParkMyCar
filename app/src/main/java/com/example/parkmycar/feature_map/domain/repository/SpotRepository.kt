@@ -10,4 +10,6 @@ interface SpotRepository {
     suspend fun deleteSpot(spot: Spot)
 
     fun getSpots() : Flow<Resource<List<Spot>>>
+
+    suspend fun exists(id: Int) : Boolean
 }

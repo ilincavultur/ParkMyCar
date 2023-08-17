@@ -7,7 +7,8 @@ fun SpotEntity.toSpot() : Spot {
         id = id,
         lat = lat,
         lng = lng,
-        type = type
+        type = type,
+        isSaved = true
     )
 }
 

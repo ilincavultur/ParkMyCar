@@ -49,7 +49,8 @@ object MapModule {
             getSavedSpot = GetSavedSpot(repository),
             getSavedSpots = GetSavedSpots(repository),
             saveSpot = SaveSpot(repository),
-            deleteSpotFromDb = DeleteSpotFromDb(repository)
+            deleteSpotFromDb = DeleteSpotFromDb(repository),
+            checkIfSaved = CheckIfSaved(repository)
         )
     }
 }

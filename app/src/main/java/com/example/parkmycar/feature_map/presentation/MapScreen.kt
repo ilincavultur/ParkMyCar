@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.parkmycar.MainActivity
 import com.example.parkmycar.core.components.map.GoogleMapView
+import com.example.parkmycar.core.components.map.MarkerControlDialog
 import com.example.parkmycar.core.components.map.RemoveFromDbDialog
 import com.example.parkmycar.core.components.permission.CoarseLocationPermissionTextProvider
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
@@ -86,6 +87,8 @@ fun MapScreen(
             }
         }
     )
+
+    var isSaved by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -173,6 +176,27 @@ fun MapScreen(
                             },
                             onDismissButtonClick = {
                                 viewModel.onEvent(MapEvent.OnDismissRemoveMarkerFromDbClick)
+                            }
+                        )
+                    }
+
+                    if (state.isMarkerControlDialogDisplayed) {
+                        //isSaved = viewModel.exists(state.spotToBeControlled)
+
+                        MarkerControlDialog(
+                            spot = state.spotToBeControlled,
+                            isSaved = state.spotToBeControlled.isSaved ?: false,
+                            onRemoveBtnClick = {
+                                viewModel.onEvent(MapEvent.RemoveMarkerFromDb(state.spotToBeControlled))
+                            },
+                            onSaveBtnClick = {
+                                //viewModel.onEvent(MapEvent.OnSaveMarkerBtnClick(state.spotToBeControlled))
+                            },
+                            onGetRouteBtnClick = {
+
+                            },
+                            onDismissDialog = {
+                                viewModel.onEvent(MapEvent.OnDismissMarkerControllDialog)
                             }
                         )
                     }

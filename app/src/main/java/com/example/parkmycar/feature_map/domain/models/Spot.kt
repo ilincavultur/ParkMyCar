@@ -4,5 +4,6 @@ data class Spot(
     val id: Int? = null,
     val lat: Double,
     val lng: Double,
-    val type: MarkerType
+    val type: MarkerType,
+    val isSaved: Boolean? = false
 )

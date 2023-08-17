@@ -6,5 +6,6 @@ data class ParkingUseCases(
     val getSavedSpot: GetSavedSpot,
     val getSavedSpots: GetSavedSpots,
     val saveSpot: SaveSpot,
-    val deleteSpotFromDb: DeleteSpotFromDb
+    val deleteSpotFromDb: DeleteSpotFromDb,
+    val checkIfSaved: CheckIfSaved,
 )

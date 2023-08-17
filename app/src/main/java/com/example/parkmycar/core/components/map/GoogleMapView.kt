@@ -48,7 +48,6 @@ fun GoogleMapView(
     onHideParkingSpotsToggleClick: () -> Unit,
     onShowCarSpotsToggleClick: () -> Unit,
     onHideCarSpotsToggleClick: () -> Unit,
-    //viewModel: MapViewModel
 ) {
     val localContext = LocalContext.current
     // all of these into the viewmodel

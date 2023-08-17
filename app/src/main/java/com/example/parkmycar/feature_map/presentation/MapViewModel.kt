@@ -38,6 +38,10 @@ class MapViewModel @Inject constructor(
         when (event) {
             is MapEvent.OnInfoWindowLongClick -> {
                 Log.d(TAG, "onEvent: OnInfoWindowLongClick")
+                _state.value = state.value.copy(
+                    isMarkerControlDialogDisplayed = true,
+                    spotToBeControlled = event.spot
+                )
             }
             is MapEvent.OnMapLongClick -> {
                 Log.d(TAG, "onEvent: OnMapLongClick")
@@ -117,10 +121,10 @@ class MapViewModel @Inject constructor(
                     withContext(Dispatchers.Main) {
                         _state.value = state.value.copy(
                             isAlertDialogDisplayed = false,
+                            isMarkerControlDialogDisplayed = false
                         )
                     }
                 }
-
             }
             is MapEvent.RemoveMarkerFromMap -> {
                 Log.d(TAG, "onEvent: RemoveMarkerFromMap")
@@ -129,6 +133,19 @@ class MapViewModel @Inject constructor(
                 Log.d(TAG, "onEvent: OnDismissRemoveMarkerFromDbClick")
                 _state.value = state.value.copy(
                     isAlertDialogDisplayed = false,
+                    isMarkerControlDialogDisplayed = false
+                )
+            }
+            MapEvent.OnGetRouteBtnClick -> {
+                Log.d(TAG, "onEvent: OnGetRouteBtnClick")
+            }
+            MapEvent.OnSaveMarkerBtnClick -> {
+                Log.d(TAG, "onEvent: OnSaveMarkerBtnClick")
+            }
+            MapEvent.OnDismissMarkerControllDialog -> {
+                Log.d(TAG, "onEvent: OnDismissMarkerControllDialog")
+                _state.value = state.value.copy(
+                    isMarkerControlDialogDisplayed = false
                 )
             }
         }

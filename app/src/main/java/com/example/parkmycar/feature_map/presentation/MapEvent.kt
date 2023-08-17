@@ -24,4 +24,7 @@ sealed class MapEvent {
     data class RemoveMarkerFromDb(val spot: Spot): MapEvent() // remove from map and db
     data class RemoveMarkerFromMap(val spot: Spot): MapEvent() // remove from map
 
+    object OnGetRouteBtnClick: MapEvent()
+    object OnDismissMarkerControllDialog: MapEvent()
+    object OnSaveMarkerBtnClick: MapEvent()
 }

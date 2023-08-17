@@ -17,14 +17,22 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.parkmycar.feature_map.domain.models.MarkerType
+import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.ui.theme.PurplePrimary
 
-@Preview
 @Composable
 fun MarkerControlDialog(
-
+    spot: Spot,
+    isSaved: Boolean,
+    onRemoveBtnClick: () -> Unit,
+    onSaveBtnClick: () -> Unit,
+    onGetRouteBtnClick: () -> Unit,
+    onDismissDialog: () -> Unit
 ) {
-    Dialog(onDismissRequest = { /*TODO*/ }) {
+    Dialog(onDismissRequest = {
+        onDismissDialog()
+    }) {
         Surface(
             shape = RoundedCornerShape(16.dp),
             color = Color.White
@@ -35,7 +43,7 @@ fun MarkerControlDialog(
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row {
                         Text(
-                            "Marker Type",
+                            spot.type.name,
                             fontWeight = FontWeight.Bold,
                             fontSize = 25.sp
                         )
@@ -44,7 +52,7 @@ fun MarkerControlDialog(
                     Row {
                         Column {
                             Text(
-                                "Lat: ",
+                                "Lat: " + spot.lat,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 20.sp
                             )
@@ -52,7 +60,7 @@ fun MarkerControlDialog(
                             Spacer(modifier = Modifier.size(20.dp))
 
                             Text(
-                                "Lng: ",
+                                "Lng: " + spot.lng,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 20.sp
                             )
@@ -61,19 +69,27 @@ fun MarkerControlDialog(
                     Spacer(modifier = Modifier.size(20.dp))
                     Row {
                         Button(
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                if (isSaved) {
+                                    onRemoveBtnClick()
+                                } else {
+                                    onSaveBtnClick()
+                                }
+                            },
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(color = PurplePrimary)
                                 //.padding(10.dp)
                         ) {
-                            Text("Save")
+                            Text(text = if (isSaved) "Remove" else "Save")
                         }
 
                         Spacer(modifier = Modifier.size(20.dp))
 
                         Button(
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                onGetRouteBtnClick()
+                            },
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(color = PurplePrimary)
