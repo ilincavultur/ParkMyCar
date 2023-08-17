@@ -9,6 +9,9 @@ import com.example.parkmycar.core.util.Resource
 import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,6 +30,8 @@ class MapViewModel @Inject constructor(
 
     private val _state = mutableStateOf(MapState())
     val state: State<MapState> = _state
+
+
 
     private var searchJob: Job? = null
 
@@ -85,12 +90,6 @@ class MapViewModel @Inject constructor(
             MapEvent.OnShowParkingSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnShowParkingSpotsToggleClick")
             }
-            MapEvent.OnZoomInClick -> {
-                Log.d(TAG, "onEvent: OnZoomInClick")
-            }
-            MapEvent.OnZoomOutClick -> {
-                Log.d(TAG, "onEvent: OnZoomOutClick")
-            }
             is MapEvent.OnMarkerClick -> {
                 Log.d(TAG, "onEvent: OnMarkerClick")
             }
@@ -147,6 +146,26 @@ class MapViewModel @Inject constructor(
                 _state.value = state.value.copy(
                     isMarkerControlDialogDisplayed = false
                 )
+            }
+            is MapEvent.OnZoomInClick -> {
+                Log.d(TAG, "onEvent: OnZoomInClick")
+                if (state.value.shouldAnimateZoom) {
+                    viewModelScope.launch {
+                        event.cameraPositionState.animate(CameraUpdateFactory.zoomIn())
+                    }
+                } else {
+                    event.cameraPositionState.move(CameraUpdateFactory.zoomIn())
+                }
+            }
+            is MapEvent.OnZoomOutClick -> {
+                Log.d(TAG, "onEvent: OnZoomOutClick")
+                if (state.value.shouldAnimateZoom) {
+                    viewModelScope.launch {
+                        event.cameraPositionState.animate(CameraUpdateFactory.zoomOut())
+                    }
+                } else {
+                    event.cameraPositionState.move(CameraUpdateFactory.zoomOut())
+                }
             }
         }
     }

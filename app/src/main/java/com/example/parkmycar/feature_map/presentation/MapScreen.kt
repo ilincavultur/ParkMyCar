@@ -48,10 +48,7 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collectLatest
 
-val singapore = LatLng(1.3588227, 103.8742114)
-val singapore2 = LatLng(1.40, 103.77)
-val singapore3 = LatLng(1.45, 103.77)
-val defaultCameraPosition = CameraPosition.fromLatLngZoom(singapore, 11f)
+
 
 
 private val permissionsToRequest = arrayOf(
@@ -88,7 +85,9 @@ fun MapScreen(
         }
     )
 
-    var isSaved by remember { mutableStateOf(false) }
+    val cameraPositionState = rememberCameraPositionState {
+        position = state.defaultCameraPosition
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -107,9 +106,9 @@ fun MapScreen(
         //var isMapLoaded by remember { mutableStateOf(state.isMapLoaded) }
         //var isMapLoaded by remember { mutableStateOf(false) }
         // Observing and controlling the camera's state can be done with a CameraPositionState
-        val cameraPositionState = rememberCameraPositionState {
-            position = defaultCameraPosition
-        }
+//        val cameraPositionState = rememberCameraPositionState {
+//            position = defaultCameraPosition
+//        }
 
         Box(Modifier.fillMaxSize()) {
             GoogleMapView(
@@ -122,10 +121,10 @@ fun MapScreen(
                     viewModel.onEvent(MapEvent.OnMapLongClick(latLng))
                 },
                 onZoomOutClick = {
-                    viewModel.onEvent(MapEvent.OnZoomOutClick)
+                    viewModel.onEvent(MapEvent.OnZoomOutClick(cameraPositionState))
                 },
                 onZoomInClick = {
-                    viewModel.onEvent(MapEvent.OnZoomInClick)
+                    viewModel.onEvent(MapEvent.OnZoomInClick(cameraPositionState))
                 },
                 onSearchIconClick = {
                     viewModel.onEvent(MapEvent.OnSearchButtonClick)

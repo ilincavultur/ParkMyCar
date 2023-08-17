@@ -2,6 +2,7 @@ package com.example.parkmycar.feature_map.presentation
 
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraPositionState
 
 sealed class MapEvent {
     data class OnMapLongClick(val latLng: LatLng): MapEvent()
@@ -14,8 +15,8 @@ sealed class MapEvent {
     object OnShowParkingSpotsToggleClick: MapEvent()
     object OnHideCarSpotsToggleClick: MapEvent()
     object OnShowCarSpotsToggleClick: MapEvent()
-    object OnZoomOutClick: MapEvent()
-    object OnZoomInClick: MapEvent()
+    data class OnZoomOutClick(val cameraPositionState: CameraPositionState): MapEvent()
+    data class OnZoomInClick(val cameraPositionState: CameraPositionState): MapEvent()
     data class OnPermissionDialogResult(val permission: String, val isGranted: Boolean): MapEvent()
     object OnPermissionDialogDismiss: MapEvent()
 
