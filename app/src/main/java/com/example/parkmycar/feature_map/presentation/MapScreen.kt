@@ -148,7 +148,7 @@ fun MapScreen(
                     viewModel.state.value.spots.forEach { spot ->
                         Marker(
                             state = MarkerState(LatLng(spot.lat ?: 0.0, spot.lng ?: 0.0)),
-                            title = "Parking spot (${spot.lat}, ${spot.lng})",
+                            title = "${spot.type} (${spot.lat}, ${spot.lng})",
                             snippet = "Short click to delete, \n Long Click to Open Control",
                             onInfoWindowClick = {
                                 viewModel.onEvent(
@@ -185,12 +185,12 @@ fun MapScreen(
                     viewModel.state.value.parkingLots.forEach { spot ->
                         Marker(
                             state = MarkerState(LatLng(spot.lat ?: 0.0, spot.lng ?: 0.0)),
-                            title = "Parking spot (${spot.lat}, ${spot.lng})",
+                            title = "${spot.type} (${spot.lat}, ${spot.lng})",
                             snippet = "Short click to delete, \n Long Click to Open Control",
                             onInfoWindowClick = {
-                                viewModel.onEvent(
-                                    MapEvent.OnInfoWindowClick(spot)
-                                )
+//                                viewModel.onEvent(
+//                                    MapEvent.OnInfoWindowClick(spot)
+//                                )
                             },
                             onInfoWindowLongClick = {
                                 viewModel.onEvent(

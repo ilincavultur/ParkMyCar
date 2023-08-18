@@ -55,7 +55,7 @@ class MapViewModel @Inject constructor(
                 }
             }
             is MapEvent.OnInfoWindowClick -> {
-                Log.d(TAG, "onEvent: OnMarkerLongClick")
+                Log.d(TAG, "onEvent: OnInfoWindowClick")
                 _state.value = state.value.copy(
                     isAlertDialogDisplayed = true,
                     spotToBeDeleted = event.spot
@@ -70,16 +70,40 @@ class MapViewModel @Inject constructor(
             }
             MapEvent.OnSearchButtonClick -> {
                 Log.d(TAG, "onEvent: OnSearchButtonClick")
-
-                searchJob?.cancel()
-                searchJob = viewModelScope.launch {
-                    delay(500L)
-                    parkingUseCases.findParkingLots()
+                loadParkingLots()
+            }
+            MapEvent.OnHideCarSpotsToggleClick -> {
+                Log.d(TAG, "onEvent: OnHideCarSpotsToggleClick")
+                _state.value = state.value.copy(
+                    spots = state.value.spots.filter {
+                        it.type == MarkerType.PARKING_SPOT
+                    }
+                )
+            }
+            MapEvent.OnHideParkingSpotsToggleClick -> {
+                Log.d(TAG, "onEvent: OnHideParkingSpotsToggleClick")
+                _state.value = state.value.copy(
+                    spots = state.value.spots.filter {
+                        it.type == MarkerType.CAR_SPOT
+                    },
+                    hiddenParkingLots = state.value.parkingLots,
+                    parkingLots = emptyList()
+                )
+            }
+            MapEvent.OnShowCarSpotsToggleClick -> {
+                Log.d(TAG, "onEvent: OnShowCarSpotsToggleClick")
+//                searchJob?.cancel()
+//                searchJob =
+                    viewModelScope.launch {
+                    //delay(500L)
+                    parkingUseCases.getSavedSpots()
                         .onEach { result ->
                             when(result) {
                                 is Resource.Error -> {
                                     _state.value = state.value.copy(
-                                        parkingLots = result.data ?: emptyList(),
+                                        spots = state.value.spots.plus(result.data?.filter {
+                                            it.type == MarkerType.CAR_SPOT
+                                        } ?: emptyList()) ,
                                         isLoading = false
                                     )
                                     _eventFlow.emit(
@@ -89,36 +113,67 @@ class MapViewModel @Inject constructor(
                                 }
                                 is Resource.Loading -> {
                                     _state.value = state.value.copy(
-                                        parkingLots = result.data ?: emptyList(),
+                                        spots = state.value.spots.plus(result.data?.filter {
+                                            it.type == MarkerType.CAR_SPOT
+                                        } ?: emptyList()) ,
                                         isLoading = true
                                     )
                                 }
                                 is Resource.Success -> {
                                     _state.value = state.value.copy(
-                                        parkingLots = result.data ?: emptyList(),
+                                        spots = state.value.spots.plus(result.data?.filter {
+                                            it.type == MarkerType.CAR_SPOT
+                                        } ?: emptyList()) ,
                                         isLoading = false
                                     )
                                 }
                             }
                         }.launchIn(this)
                 }
-
-            }
-            MapEvent.OnHideCarSpotsToggleClick -> {
-                Log.d(TAG, "onEvent: OnHideCarSpotsToggleClick")
-            }
-            MapEvent.OnHideParkingSpotsToggleClick -> {
-                Log.d(TAG, "onEvent: OnHideParkingSpotsToggleClick")
-            }
-            MapEvent.OnShowCarSpotsToggleClick -> {
-                Log.d(TAG, "onEvent: OnShowCarSpotsToggleClick")
             }
             MapEvent.OnShowParkingSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnShowParkingSpotsToggleClick")
+                viewModelScope.launch {
+                //delay(500L)
+                parkingUseCases.getSavedSpots()
+                    .onEach { result ->
+                        when(result) {
+                            is Resource.Error -> {
+                                _state.value = state.value.copy(
+                                    spots = state.value.spots.plus(result.data?.filter {
+                                        it.type == MarkerType.PARKING_SPOT
+                                    } ?: emptyList()) ,
+                                    isLoading = false
+                                )
+                                _eventFlow.emit(
+                                    MapUiEvent.ShowSnackbar(
+                                        result.message ?: "Unknown Error"
+                                    ))
+                            }
+                            is Resource.Loading -> {
+                                _state.value = state.value.copy(
+                                    spots = state.value.spots.plus(result.data?.filter {
+                                        it.type == MarkerType.PARKING_SPOT
+                                    } ?: emptyList()) ,
+                                    isLoading = true
+                                )
+                            }
+                            is Resource.Success -> {
+                                _state.value = state.value.copy(
+                                    spots = state.value.spots.plus(result.data?.filter {
+                                        it.type == MarkerType.PARKING_SPOT
+                                    } ?: emptyList()) ,
+                                    isLoading = false
+                                )
+                            }
+                        }
+                    }.launchIn(this)
+                }
+                _state.value = state.value.copy(
+                    parkingLots = state.value.hiddenParkingLots,
+                    hiddenParkingLots = emptyList()
+                )
             }
-//            is MapEvent.OnMarkerClick -> {
-//                Log.d(TAG, "onEvent: OnMarkerClick")
-//            }
             is MapEvent.OnPermissionDialogDismiss -> {
                 Log.d(TAG, "onEvent: OnPermissionDialogDismiss")
                 _state.value.visiblePermissionDialogQueue.removeFirst()
@@ -142,14 +197,15 @@ class MapViewModel @Inject constructor(
                     parkingUseCases.deleteSpotFromDb(
                         event.spot
                     )
-                    loadMarkers()
                     withContext(Dispatchers.Main) {
+                        //loadMarkers()
                         _state.value = state.value.copy(
                             isAlertDialogDisplayed = false,
                             isMarkerControlDialogDisplayed = false
                         )
                     }
                 }
+                loadMarkers()
             }
             is MapEvent.RemoveMarkerFromMap -> {
                 Log.d(TAG, "onEvent: RemoveMarkerFromMap")
@@ -201,8 +257,13 @@ class MapViewModel @Inject constructor(
                             type = event.spot.type
                         )
                     )
-                    loadMarkers()
+                    withContext(Dispatchers.Main) {
+                        _state.value = state.value.copy(
+                            isMarkerControlDialogDisplayed = false
+                        )
+                    }
                 }
+                loadMarkers()
             }
         }
     }
@@ -210,6 +271,7 @@ class MapViewModel @Inject constructor(
     private fun loadMarkers() {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
+            delay(500L)
             parkingUseCases.getSavedSpots()
                 .onEach { result ->
                     when (result) {
@@ -238,6 +300,40 @@ class MapViewModel @Inject constructor(
                         }
                     }
                 }.launchIn(this)
+        }
+    }
+
+    private fun loadParkingLots() {
+        viewModelScope.launch {
+            //delay(500L)
+            parkingUseCases.findParkingLots()
+                .onEach { result ->
+                    when(result) {
+                        is Resource.Error -> {
+                            _state.value = state.value.copy(
+                                parkingLots = result.data ?: emptyList(),
+                                isLoading = false
+                            )
+                            _eventFlow.emit(
+                                MapUiEvent.ShowSnackbar(
+                                    result.message ?: "Unknown Error"
+                                ))
+                        }
+                        is Resource.Loading -> {
+                            _state.value = state.value.copy(
+                                parkingLots = result.data ?: emptyList(),
+                                isLoading = true
+                            )
+                        }
+                        is Resource.Success -> {
+                            _state.value = state.value.copy(
+                                parkingLots = result.data ?: emptyList(),
+                                isLoading = false
+                            )
+                        }
+                    }
+                }.launchIn(this)
+            loadMarkers()
         }
     }
 }

@@ -15,6 +15,7 @@ data class MapState(
     var isLoading: Boolean = false,
     val spots: List<Spot> = emptyList(),
     val parkingLots: List<Spot> = emptyList(),
+    val hiddenParkingLots: List<Spot> = emptyList(),
     var isMapLoaded: Boolean = false,
     var permissionsGranted: Boolean = false,
     var visiblePermissionDialogQueue: MutableList<String> = mutableStateListOf<String>(),
