@@ -34,12 +34,15 @@ import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.parkmycar.MainActivity
+import com.example.parkmycar.R
 import com.example.parkmycar.core.components.map.GoogleMapView
 import com.example.parkmycar.core.components.map.MarkerControlDialog
 import com.example.parkmycar.core.components.map.RemoveFromDbDialog
+import com.example.parkmycar.core.components.map.bitmapDescriptorFromVector
 import com.example.parkmycar.core.components.permission.CoarseLocationPermissionTextProvider
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
+import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -144,9 +147,9 @@ fun MapScreen(
                 content = {
                     viewModel.state.value.spots.forEach { spot ->
                         Marker(
-                            state = MarkerState(LatLng(spot.lat, spot.lng)),
+                            state = MarkerState(LatLng(spot.lat ?: 0.0, spot.lng ?: 0.0)),
                             title = "Parking spot (${spot.lat}, ${spot.lng})",
-                            snippet = "Long click to delete",
+                            snippet = "Short click to delete, \n Long Click to Open Control",
                             onInfoWindowClick = {
                                 viewModel.onEvent(
                                     MapEvent.OnInfoWindowClick(spot)
@@ -161,9 +164,44 @@ fun MapScreen(
                                 it.showInfoWindow()
                                 true
                             },
-                            icon = BitmapDescriptorFactory.defaultMarker(
-                                BitmapDescriptorFactory.HUE_GREEN
-                            )
+                            icon = when (spot.type) {
+                                MarkerType.PARKING_SPOT -> {
+                                    bitmapDescriptorFromVector(localContext, R.drawable.ic_baseline_local_parking_24)
+                                }
+                                MarkerType.CAR_SPOT -> {
+                                    BitmapDescriptorFactory.defaultMarker(
+                                        BitmapDescriptorFactory.HUE_GREEN
+                                    )
+                                }
+                                null -> {
+                                    BitmapDescriptorFactory.defaultMarker(
+                                        BitmapDescriptorFactory.HUE_GREEN
+                                    )
+                                }
+                            }
+                        )
+                    }
+
+                    viewModel.state.value.parkingLots.forEach { spot ->
+                        Marker(
+                            state = MarkerState(LatLng(spot.lat ?: 0.0, spot.lng ?: 0.0)),
+                            title = "Parking spot (${spot.lat}, ${spot.lng})",
+                            snippet = "Short click to delete, \n Long Click to Open Control",
+                            onInfoWindowClick = {
+                                viewModel.onEvent(
+                                    MapEvent.OnInfoWindowClick(spot)
+                                )
+                            },
+                            onInfoWindowLongClick = {
+                                viewModel.onEvent(
+                                    MapEvent.OnInfoWindowLongClick(spot)
+                                )
+                            },
+                            onClick = {
+                                it.showInfoWindow()
+                                true
+                            },
+                            icon = bitmapDescriptorFromVector(localContext, R.drawable.ic_baseline_local_parking_24)
                         )
                     }
 
@@ -180,8 +218,6 @@ fun MapScreen(
                     }
 
                     if (state.isMarkerControlDialogDisplayed) {
-                        //isSaved = viewModel.exists(state.spotToBeControlled)
-
                         MarkerControlDialog(
                             spot = state.spotToBeControlled,
                             isSaved = state.spotToBeControlled.isSaved ?: false,
@@ -189,7 +225,7 @@ fun MapScreen(
                                 viewModel.onEvent(MapEvent.RemoveMarkerFromDb(state.spotToBeControlled))
                             },
                             onSaveBtnClick = {
-                                //viewModel.onEvent(MapEvent.OnSaveMarkerBtnClick(state.spotToBeControlled))
+                                viewModel.onEvent(MapEvent.OnSaveMarkerBtnClick(state.spotToBeControlled))
                             },
                             onGetRouteBtnClick = {
 

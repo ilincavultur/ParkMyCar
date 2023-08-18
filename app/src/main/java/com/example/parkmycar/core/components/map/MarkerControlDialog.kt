@@ -43,7 +43,7 @@ fun MarkerControlDialog(
                 Column(modifier = Modifier.padding(20.dp)) {
                     Row {
                         Text(
-                            spot.type.name,
+                            spot.type?.name ?: "",
                             fontWeight = FontWeight.Bold,
                             fontSize = 25.sp
                         )

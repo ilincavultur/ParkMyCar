@@ -10,14 +10,9 @@ import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,8 +25,6 @@ class MapViewModel @Inject constructor(
 
     private val _state = mutableStateOf(MapState())
     val state: State<MapState> = _state
-
-
 
     private var searchJob: Job? = null
 
@@ -77,6 +70,39 @@ class MapViewModel @Inject constructor(
             }
             MapEvent.OnSearchButtonClick -> {
                 Log.d(TAG, "onEvent: OnSearchButtonClick")
+
+                searchJob?.cancel()
+                searchJob = viewModelScope.launch {
+                    delay(500L)
+                    parkingUseCases.findParkingLots()
+                        .onEach { result ->
+                            when(result) {
+                                is Resource.Error -> {
+                                    _state.value = state.value.copy(
+                                        parkingLots = result.data ?: emptyList(),
+                                        isLoading = false
+                                    )
+                                    _eventFlow.emit(
+                                        MapUiEvent.ShowSnackbar(
+                                            result.message ?: "Unknown Error"
+                                        ))
+                                }
+                                is Resource.Loading -> {
+                                    _state.value = state.value.copy(
+                                        parkingLots = result.data ?: emptyList(),
+                                        isLoading = true
+                                    )
+                                }
+                                is Resource.Success -> {
+                                    _state.value = state.value.copy(
+                                        parkingLots = result.data ?: emptyList(),
+                                        isLoading = false
+                                    )
+                                }
+                            }
+                        }.launchIn(this)
+                }
+
             }
             MapEvent.OnHideCarSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnHideCarSpotsToggleClick")
@@ -90,9 +116,9 @@ class MapViewModel @Inject constructor(
             MapEvent.OnShowParkingSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnShowParkingSpotsToggleClick")
             }
-            is MapEvent.OnMarkerClick -> {
-                Log.d(TAG, "onEvent: OnMarkerClick")
-            }
+//            is MapEvent.OnMarkerClick -> {
+//                Log.d(TAG, "onEvent: OnMarkerClick")
+//            }
             is MapEvent.OnPermissionDialogDismiss -> {
                 Log.d(TAG, "onEvent: OnPermissionDialogDismiss")
                 _state.value.visiblePermissionDialogQueue.removeFirst()
@@ -138,9 +164,6 @@ class MapViewModel @Inject constructor(
             MapEvent.OnGetRouteBtnClick -> {
                 Log.d(TAG, "onEvent: OnGetRouteBtnClick")
             }
-            MapEvent.OnSaveMarkerBtnClick -> {
-                Log.d(TAG, "onEvent: OnSaveMarkerBtnClick")
-            }
             MapEvent.OnDismissMarkerControllDialog -> {
                 Log.d(TAG, "onEvent: OnDismissMarkerControllDialog")
                 _state.value = state.value.copy(
@@ -165,6 +188,20 @@ class MapViewModel @Inject constructor(
                     }
                 } else {
                     event.cameraPositionState.move(CameraUpdateFactory.zoomOut())
+                }
+            }
+            is MapEvent.OnSaveMarkerBtnClick -> {
+                Log.d(TAG, "onEvent: OnSaveMarkerBtnClick")
+                viewModelScope.launch {
+                    parkingUseCases.saveSpot(
+                        Spot(
+                            name = event.spot.name,
+                            lat = event.spot.lat,
+                            lng = event.spot.lng,
+                            type = event.spot.type
+                        )
+                    )
+                    loadMarkers()
                 }
             }
         }

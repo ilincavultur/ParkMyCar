@@ -1,8 +1,7 @@
-package com.example.parkmycar.feature_map.data
+package com.example.parkmycar.feature_map.data.local
 
 import androidx.room.*
-import com.example.parkmycar.core.util.Resource
-import kotlinx.coroutines.flow.Flow
+import com.example.parkmycar.feature_map.data.local.entity.SpotEntity
 
 @Dao
 interface SpotDao {

@@ -14,13 +14,14 @@ val singapore3 = LatLng(1.45, 103.77)
 data class MapState(
     var isLoading: Boolean = false,
     val spots: List<Spot> = emptyList(),
+    val parkingLots: List<Spot> = emptyList(),
     var isMapLoaded: Boolean = false,
     var permissionsGranted: Boolean = false,
     var visiblePermissionDialogQueue: MutableList<String> = mutableStateListOf<String>(),
     var isAlertDialogDisplayed: Boolean = false,
-    var spotToBeDeleted: Spot = Spot(id = null,0.0,0.0,MarkerType.CAR_SPOT),
+    var spotToBeDeleted: Spot = Spot(),
     var isMarkerControlDialogDisplayed: Boolean = false,
-    var spotToBeControlled: Spot = Spot(id = null,0.0,0.0,MarkerType.CAR_SPOT),
+    var spotToBeControlled: Spot = Spot(),
     val shouldAnimateZoom: Boolean = true,
     val defaultCameraPosition: CameraPosition = CameraPosition.fromLatLngZoom(singapore, 11f)
 )

@@ -12,4 +12,6 @@ interface SpotRepository {
     fun getSpots() : Flow<Resource<List<Spot>>>
 
     suspend fun exists(id: Int) : Boolean
+
+    fun findParkingLots(): Flow<Resource<List<Spot>>>
 }

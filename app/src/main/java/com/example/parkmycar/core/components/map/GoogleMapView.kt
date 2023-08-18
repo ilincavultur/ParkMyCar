@@ -135,37 +135,12 @@ fun GoogleMapView(
                 .fillMaxWidth()
                 .padding(30.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-            ) {
-                SwitchButton(
-                    onCheckedChange = {
-                        if (it) {
-                            onShowParkingSpotsToggleClick()
-                        } else {
-                            onHideParkingSpotsToggleClick()
-                        }
-                    },
-                    checkedTrackColor = Color(0xFF0029FF),
-                    uncheckedTrackColor = Color(0x3E0029FF)
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End,
-            ) {
-                SwitchButton(
-                    onCheckedChange = {
-                        if (it) {
-                            onShowCarSpotsToggleClick()
-                        } else {
-                            onHideCarSpotsToggleClick()
-                        }
-                    },
-                    checkedTrackColor = Color(0xFF673AB7),
-                    uncheckedTrackColor = Color(0x3D673AB7)
-                )
-            }
+            MarkerToggles(
+                onShowParkingSpotsToggleClick = { onShowParkingSpotsToggleClick() },
+                onHideParkingSpotsToggleClick = { onHideParkingSpotsToggleClick() },
+                onShowCarSpotsToggleClick = { onShowCarSpotsToggleClick() },
+                onHideCarSpotsToggleClick = { onHideCarSpotsToggleClick() }
+            )
         }
 
         //DebugView(cameraPositionState, singaporeState)

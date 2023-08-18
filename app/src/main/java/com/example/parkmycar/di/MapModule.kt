@@ -3,7 +3,8 @@ package com.example.parkmycar.di
 import android.content.Context
 import androidx.room.Room
 import com.example.parkmycar.core.util.SpotDatabase
-import com.example.parkmycar.feature_map.data.SpotRepositoryImpl
+import com.example.parkmycar.feature_map.data.remote.PlaceApi
+import com.example.parkmycar.feature_map.data.repository.SpotRepositoryImpl
 import com.example.parkmycar.feature_map.domain.repository.SpotRepository
 import com.example.parkmycar.feature_map.domain.usecases.*
 import dagger.Module
@@ -11,6 +12,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -36,15 +40,18 @@ object MapModule {
 
     @Singleton
     @Provides
-    fun provideSpotRepository(db: SpotDatabase): SpotRepository {
-        return SpotRepositoryImpl(db.dao)
+    fun provideSpotRepository(
+        api: PlaceApi,
+        db: SpotDatabase
+    ): SpotRepository {
+        return SpotRepositoryImpl(api, db.dao)
     }
 
     @Provides
     @Singleton
     fun provideParkingUseCases(repository: SpotRepository): ParkingUseCases {
         return ParkingUseCases(
-            findParkingLot = FindParkingLot(repository),
+            findParkingLots = FindParkingLots(repository),
             findRouteToParkingLot = FindRouteToParkingLot(repository),
             getSavedSpot = GetSavedSpot(repository),
             getSavedSpots = GetSavedSpots(repository),
@@ -53,4 +60,13 @@ object MapModule {
             checkIfSaved = CheckIfSaved(repository)
         )
     }
+
+    @Singleton
+    @Provides
+    fun providePlaceFindApi(): PlaceApi = Retrofit.Builder()
+        .baseUrl("https://maps.googleapis.com/maps/api/place/findplacefromtext/")
+        .client(OkHttpClient())
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(PlaceApi::class.java)
 }

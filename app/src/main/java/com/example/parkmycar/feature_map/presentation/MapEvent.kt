@@ -6,7 +6,7 @@ import com.google.maps.android.compose.CameraPositionState
 
 sealed class MapEvent {
     data class OnMapLongClick(val latLng: LatLng): MapEvent()
-    data class OnMarkerClick(val spot: Spot): MapEvent()
+    //data class OnMarkerClick(val spot: Spot): MapEvent()
     data class OnInfoWindowClick(val spot: Spot): MapEvent() // does not exist
     data class OnInfoWindowLongClick(val spot: Spot): MapEvent()
     object MapLoaded: MapEvent()
@@ -27,5 +27,5 @@ sealed class MapEvent {
 
     object OnGetRouteBtnClick: MapEvent()
     object OnDismissMarkerControllDialog: MapEvent()
-    object OnSaveMarkerBtnClick: MapEvent()
+    data class OnSaveMarkerBtnClick(val spot: Spot): MapEvent()
 }
