@@ -8,4 +8,5 @@ data class ParkingUseCases(
     val saveSpot: SaveSpot,
     val deleteSpotFromDb: DeleteSpotFromDb,
     val checkIfSaved: CheckIfSaved,
+    val computeRoute: ComputeRoute
 )

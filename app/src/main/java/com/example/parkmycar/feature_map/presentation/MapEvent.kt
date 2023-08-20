@@ -23,9 +23,11 @@ sealed class MapEvent {
 
     object OnDismissRemoveMarkerFromDbClick: MapEvent()
     data class RemoveMarkerFromDb(val spot: Spot): MapEvent() // remove from map and db
-    data class RemoveMarkerFromMap(val spot: Spot): MapEvent() // remove from map
+    //data class RemoveMarkerFromMap(val spot: Spot): MapEvent() // remove from map
 
-    object OnGetRouteBtnClick: MapEvent()
+    data class OnGetRouteBtnClick(val source: String, val destination: String): MapEvent()
     object OnDismissMarkerControllDialog: MapEvent()
     data class OnSaveMarkerBtnClick(val spot: Spot): MapEvent()
+
+    //data class ComputeRoute(val source: String, val destination: String) : MapEvent()
 }

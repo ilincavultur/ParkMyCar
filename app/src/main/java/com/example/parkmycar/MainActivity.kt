@@ -16,6 +16,7 @@ import com.example.parkmycar.core.components.AppScaffold
 import com.example.parkmycar.core.navigation.Navigation
 
 import com.example.parkmycar.ui.theme.ParkMyCarTheme
+import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         //installSplashScreen()
 
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         super.onCreate(savedInstanceState)
 
         setContent {

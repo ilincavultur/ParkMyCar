@@ -3,6 +3,7 @@ package com.example.parkmycar.di
 import android.content.Context
 import androidx.room.Room
 import com.example.parkmycar.core.util.SpotDatabase
+import com.example.parkmycar.feature_map.data.remote.DirectionsApi
 import com.example.parkmycar.feature_map.data.remote.PlaceApi
 import com.example.parkmycar.feature_map.data.repository.SpotRepositoryImpl
 import com.example.parkmycar.feature_map.domain.repository.SpotRepository
@@ -41,10 +42,11 @@ object MapModule {
     @Singleton
     @Provides
     fun provideSpotRepository(
-        api: PlaceApi,
+        placeApi: PlaceApi,
+        directionsApi: DirectionsApi,
         db: SpotDatabase
     ): SpotRepository {
-        return SpotRepositoryImpl(api, db.dao)
+        return SpotRepositoryImpl(placeApi, directionsApi, db.dao)
     }
 
     @Provides
@@ -57,7 +59,8 @@ object MapModule {
             getSavedSpots = GetSavedSpots(repository),
             saveSpot = SaveSpot(repository),
             deleteSpotFromDb = DeleteSpotFromDb(repository),
-            checkIfSaved = CheckIfSaved(repository)
+            checkIfSaved = CheckIfSaved(repository),
+            computeRoute = ComputeRoute(repository)
         )
     }
 
@@ -69,4 +72,13 @@ object MapModule {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(PlaceApi::class.java)
+
+    @Singleton
+    @Provides
+    fun provideDirectionsApi(): DirectionsApi = Retrofit.Builder()
+        .baseUrl("https://maps.googleapis.com/maps/api/directions/")
+        .client(OkHttpClient())
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(DirectionsApi::class.java)
 }

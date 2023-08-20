@@ -28,6 +28,7 @@ import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
@@ -87,6 +88,8 @@ fun MapScreen(
             }
         }
     )
+
+    val drawPolylines = mutableListOf<LatLng>()
 
     val cameraPositionState = rememberCameraPositionState {
         position = state.defaultCameraPosition
@@ -228,13 +231,23 @@ fun MapScreen(
                                 viewModel.onEvent(MapEvent.OnSaveMarkerBtnClick(state.spotToBeControlled))
                             },
                             onGetRouteBtnClick = {
-
+                                viewModel.onEvent(MapEvent.OnGetRouteBtnClick("${singapore.latitude},${singapore.longitude}", "${singapore3.latitude},${singapore3.longitude}"))
                             },
                             onDismissDialog = {
                                 viewModel.onEvent(MapEvent.OnDismissMarkerControllDialog)
                             }
                         )
                     }
+
+                    state.path.forEach { latLng ->
+                        Log.d(TAG, "MapScreen: " + latLng + "\n")
+                        drawPolylines += latLng
+                    }
+                    Polyline(
+                        points = drawPolylines,
+                        color = Color.Red,
+                        width = 10f
+                    )
                 }
             )
 

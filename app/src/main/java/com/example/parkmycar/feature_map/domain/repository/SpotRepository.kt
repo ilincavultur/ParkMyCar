@@ -2,6 +2,7 @@ package com.example.parkmycar.feature_map.domain.repository
 
 import com.example.parkmycar.core.util.Resource
 import com.example.parkmycar.feature_map.domain.models.Spot
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.Flow
 
 interface SpotRepository {
@@ -14,4 +15,6 @@ interface SpotRepository {
     suspend fun exists(id: Int) : Boolean
 
     fun findParkingLots(): Flow<Resource<List<Spot>>>
+
+    suspend fun computeRoute() : Flow<Resource<MutableList<List<LatLng>>>>
 }

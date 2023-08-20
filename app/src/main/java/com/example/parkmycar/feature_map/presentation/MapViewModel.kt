@@ -10,6 +10,7 @@ import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -207,18 +208,15 @@ class MapViewModel @Inject constructor(
                 }
                 loadMarkers()
             }
-            is MapEvent.RemoveMarkerFromMap -> {
-                Log.d(TAG, "onEvent: RemoveMarkerFromMap")
-            }
+//            is MapEvent.RemoveMarkerFromMap -> {
+//                Log.d(TAG, "onEvent: RemoveMarkerFromMap")
+//            }
             MapEvent.OnDismissRemoveMarkerFromDbClick -> {
                 Log.d(TAG, "onEvent: OnDismissRemoveMarkerFromDbClick")
                 _state.value = state.value.copy(
                     isAlertDialogDisplayed = false,
                     isMarkerControlDialogDisplayed = false
                 )
-            }
-            MapEvent.OnGetRouteBtnClick -> {
-                Log.d(TAG, "onEvent: OnGetRouteBtnClick")
             }
             MapEvent.OnDismissMarkerControllDialog -> {
                 Log.d(TAG, "onEvent: OnDismissMarkerControllDialog")
@@ -264,6 +262,39 @@ class MapViewModel @Inject constructor(
                     }
                 }
                 loadMarkers()
+            }
+            is MapEvent.OnGetRouteBtnClick -> {
+                Log.d(TAG, "onEvent: OnGetRouteBtnClick")
+                viewModelScope.launch(Dispatchers.Default) {
+                    parkingUseCases.computeRoute().onEach { result ->
+                        when (result) {
+                            is Resource.Error -> {
+                                _state.value = state.value.copy(
+                                    path = result.data ?: mutableListOf(),
+                                    //path = state.value.path.plus(result.data ?: emptyList()),
+                                    isLoading = false
+                                )
+                                _eventFlow.emit(
+                                    MapUiEvent.ShowSnackbar(
+                                        result.message ?: "Unknown Error"
+                                    )
+                                )
+                            }
+                            is Resource.Loading -> {
+                                _state.value = state.value.copy(
+                                    path = result.data ?: mutableListOf(),
+                                    isLoading = true
+                                )
+                            }
+                            is Resource.Success -> {
+                                _state.value = state.value.copy(
+                                    path = result.data ?: mutableListOf(),
+                                    isLoading = false
+                                )
+                            }
+                        }
+                    }.launchIn(this)
+                }
             }
         }
     }
