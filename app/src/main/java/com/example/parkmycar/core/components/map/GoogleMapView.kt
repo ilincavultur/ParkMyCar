@@ -1,6 +1,9 @@
 package com.example.parkmycar.core.components.map
 
+import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.ContentValues.TAG
+import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ScrollState
@@ -24,16 +27,24 @@ import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.presentation.*
 import com.example.parkmycar.ui.theme.ParkMyCarTheme
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 val singapore = LatLng(1.35, 103.87)
+private const val zoom = 8f
 
+@SuppressLint("FlowOperatorInvokedInComposition", "MissingPermission")
 @Composable
 fun GoogleMapView(
     modifier: Modifier = Modifier,
@@ -48,6 +59,8 @@ fun GoogleMapView(
     onHideParkingSpotsToggleClick: () -> Unit,
     onShowCarSpotsToggleClick: () -> Unit,
     onHideCarSpotsToggleClick: () -> Unit,
+    updateLocation: (Location) -> Unit,
+    locationSource: MyLocationSource,
 ) {
     val localContext = LocalContext.current
     // all of these into the viewmodel
@@ -65,8 +78,31 @@ fun GoogleMapView(
     var shouldAnimateZoom by remember { mutableStateOf(true) }
     var ticker by remember { mutableStateOf(0) }
     var mapProperties by remember {
-        mutableStateOf(MapProperties(mapType = MapType.NORMAL))
+        mutableStateOf(MapProperties(mapType = MapType.NORMAL, isMyLocationEnabled = true))
     }
+
+    // Detect when the map starts moving and print the reason
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (cameraPositionState.isMoving) {
+            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
+        }
+    }
+
+
+    // The location request that defines the location updates
+    var locationRequest by remember {
+        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build())
+    }
+    LocationUpdatesEffect(locationRequest!!) { result ->
+        // For each result update the text
+        for (currentLocation in result.locations) {
+            updateLocation(currentLocation)
+            locationSource.onLocationChanged(currentLocation)
+            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), 8F)
+            cameraPositionState.position = cameraPosition
+        }
+    }
+
 
     GoogleMap(
         modifier = modifier,
@@ -79,7 +115,8 @@ fun GoogleMapView(
         },
         onMapLongClick = { LatLng ->
             onMapLongClick(LatLng)
-        }
+        },
+        locationSource = locationSource
     ) {
         content()
     }
@@ -127,7 +164,6 @@ fun GoogleMapView(
                 )
             }
         }
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,

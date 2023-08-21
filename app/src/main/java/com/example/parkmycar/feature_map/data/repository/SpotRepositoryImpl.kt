@@ -116,12 +116,10 @@ class SpotRepositoryImpl(
         //emit(Resource.Success(remoteSpots))
     }
 
-    override suspend fun computeRoute() : Flow<Resource<MutableList<List<LatLng>>>> = flow {
+    override suspend fun computeRoute(source: String, target: String) : Flow<Resource<MutableList<List<LatLng>>>> = flow {
         try {
-            //val sourceString = "${singapore.latitude},${singapore.longitude}"
-            //val targetString = "${singapore3.latitude},${singapore3.longitude}"
-            val sourceString = "Singapore"
-            val targetString = "Kulai"
+            val sourceString = source
+            val targetString = target
             val remoteDirections = directionsApi.computeRoute(
                 origin = sourceString,
                 destination = targetString,

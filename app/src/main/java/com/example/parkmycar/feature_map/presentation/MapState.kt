@@ -1,5 +1,6 @@
 package com.example.parkmycar.feature_map.presentation
 
+import android.location.Location
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import com.example.parkmycar.feature_map.domain.models.MarkerType
@@ -25,5 +26,7 @@ data class MapState(
     var isMarkerControlDialogDisplayed: Boolean = false,
     var spotToBeControlled: Spot = Spot(),
     val shouldAnimateZoom: Boolean = true,
-    val defaultCameraPosition: CameraPosition = CameraPosition.fromLatLngZoom(singapore, 11f)
+    val defaultCameraPosition: CameraPosition = CameraPosition.fromLatLngZoom(singapore, 11f),
+    val currentLocation: Location? = null,
+    var isInShowRouteState: Boolean = false,
 )

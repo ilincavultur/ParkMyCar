@@ -20,7 +20,7 @@ import java.io.IOException
 class ComputeRoute(
     private val repository: SpotRepository
 ) {
-    suspend operator fun invoke() : Flow<Resource<MutableList<List<LatLng>>>> {
-        return repository.computeRoute()
+    suspend operator fun invoke(source: String, target: String) : Flow<Resource<MutableList<List<LatLng>>>> {
+        return repository.computeRoute(source, target)
     }
 }

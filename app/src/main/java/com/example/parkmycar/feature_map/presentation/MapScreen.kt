@@ -1,32 +1,35 @@
 package com.example.parkmycar.feature_map.presentation
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.LocalActivityManager
+import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.provider.Settings
 import android.provider.Settings.ACTION_WIRELESS_SETTINGS
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -36,23 +39,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.parkmycar.MainActivity
 import com.example.parkmycar.R
-import com.example.parkmycar.core.components.map.GoogleMapView
-import com.example.parkmycar.core.components.map.MarkerControlDialog
-import com.example.parkmycar.core.components.map.RemoveFromDbDialog
-import com.example.parkmycar.core.components.map.bitmapDescriptorFromVector
+import com.example.parkmycar.core.components.map.*
 import com.example.parkmycar.core.components.permission.CoarseLocationPermissionTextProvider
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
 import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
+import com.example.parkmycar.locationCallback
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collectLatest
-
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 
 private val permissionsToRequest = arrayOf(
@@ -69,6 +74,10 @@ internal fun Context.findActivity(): Activity {
     throw IllegalStateException("Permissions should be called in the context of an Activity")
 }
 
+@SuppressLint("FlowOperatorInvokedInComposition")
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
 @Composable
 fun MapScreen(
     navController: NavController,
@@ -89,11 +98,19 @@ fun MapScreen(
         }
     )
 
+
+
+    val scope = rememberCoroutineScope()
+
+    var counter = 0
+
     val drawPolylines = mutableListOf<LatLng>()
 
     val cameraPositionState = rememberCameraPositionState {
         position = state.defaultCameraPosition
     }
+
+    val locationSource = MyLocationSource()
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -146,6 +163,10 @@ fun MapScreen(
                 },
                 onHideCarSpotsToggleClick = {
                     viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick)
+                },
+                locationSource = locationSource,
+                updateLocation = {
+                   viewModel.onEvent(MapEvent.UpdateLocation(it))
                 },
                 content = {
                     viewModel.state.value.spots.forEach { spot ->
@@ -231,7 +252,7 @@ fun MapScreen(
                                 viewModel.onEvent(MapEvent.OnSaveMarkerBtnClick(state.spotToBeControlled))
                             },
                             onGetRouteBtnClick = {
-                                viewModel.onEvent(MapEvent.OnGetRouteBtnClick("${singapore.latitude},${singapore.longitude}", "${singapore3.latitude},${singapore3.longitude}"))
+                                viewModel.onEvent(MapEvent.OnGetRouteBtnClick("${state.currentLocation?.latitude ?: 0.0},${state.currentLocation?.longitude ?: 0.0}", "${state.spotToBeControlled.lat},${state.spotToBeControlled.lng}"))
                             },
                             onDismissDialog = {
                                 viewModel.onEvent(MapEvent.OnDismissMarkerControllDialog)
@@ -264,6 +285,14 @@ fun MapScreen(
                             .background(MaterialTheme.colors.background)
                             .wrapContentSize()
                     )
+                }
+            }
+            if (state.isInShowRouteState) {
+                Button(
+                    onClick = { /*TODO*/ },
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                    ) {
+                    Text(text = "Start Session")
                 }
             }
         }
@@ -308,4 +337,34 @@ fun MapScreen(
                     }
                 )
         }
+}
+
+/**
+ * A [LocationSource] which allows it's location to be set. In practice you would request location
+ * updates (https://developer.android.com/training/location/request-updates).
+ */
+class MyLocationSource : LocationSource {
+
+    private var listener: LocationSource.OnLocationChangedListener? = null
+
+    override fun activate(listener: LocationSource.OnLocationChangedListener) {
+        this.listener = listener
+    }
+
+    override fun deactivate() {
+        listener = null
+    }
+
+    fun onLocationChanged(location: Location) {
+        listener?.onLocationChanged(location)
+    }
+}
+
+fun newLocation(): Location {
+    val location = Location("MyLocationProvider")
+    location.apply {
+        latitude = singapore.latitude + Random.nextFloat()
+        longitude = singapore.longitude + Random.nextFloat()
+    }
+    return location
 }

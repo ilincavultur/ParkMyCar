@@ -1,5 +1,6 @@
 package com.example.parkmycar.feature_map.presentation
 
+import android.location.Location
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
@@ -28,6 +29,8 @@ sealed class MapEvent {
     data class OnGetRouteBtnClick(val source: String, val destination: String): MapEvent()
     object OnDismissMarkerControllDialog: MapEvent()
     data class OnSaveMarkerBtnClick(val spot: Spot): MapEvent()
+
+    data class UpdateLocation(val location: Location): MapEvent()
 
     //data class ComputeRoute(val source: String, val destination: String) : MapEvent()
 }

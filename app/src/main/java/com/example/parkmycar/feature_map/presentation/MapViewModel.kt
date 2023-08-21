@@ -1,6 +1,7 @@
 package com.example.parkmycar.feature_map.presentation
 
 import android.content.ContentValues.TAG
+import android.location.Location
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.example.parkmycar.core.util.Resource
 import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -266,13 +268,14 @@ class MapViewModel @Inject constructor(
             is MapEvent.OnGetRouteBtnClick -> {
                 Log.d(TAG, "onEvent: OnGetRouteBtnClick")
                 viewModelScope.launch(Dispatchers.Default) {
-                    parkingUseCases.computeRoute().onEach { result ->
+                    parkingUseCases.computeRoute(event.source, event.destination).onEach { result ->
                         when (result) {
                             is Resource.Error -> {
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
                                     //path = state.value.path.plus(result.data ?: emptyList()),
-                                    isLoading = false
+                                    isLoading = false,
+                                    isInShowRouteState = true
                                 )
                                 _eventFlow.emit(
                                     MapUiEvent.ShowSnackbar(
@@ -283,18 +286,25 @@ class MapViewModel @Inject constructor(
                             is Resource.Loading -> {
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
-                                    isLoading = true
+                                    isLoading = true,
+                                    isInShowRouteState = true
                                 )
                             }
                             is Resource.Success -> {
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
-                                    isLoading = false
+                                    isLoading = false,
+                                    isInShowRouteState = true
                                 )
                             }
                         }
                     }.launchIn(this)
                 }
+            }
+            is MapEvent.UpdateLocation -> {
+                _state.value = state.value.copy(
+                    currentLocation = event.location
+                )
             }
         }
     }
