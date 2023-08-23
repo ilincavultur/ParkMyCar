@@ -30,6 +30,5 @@ data class MapState(
     val currentLocation: Location? = null,
     var isInShowRouteState: Boolean = false,
     var isInTrackingRouteState: Boolean = false,
-    val drawPolylines: List<LatLng> = mutableListOf(),
     val zoom: Float = 8f,
 )

@@ -13,6 +13,7 @@ import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
 import com.example.parkmycar.feature_map.presentation.LocationService.Companion.ACTION_STOP
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -311,8 +312,9 @@ class MapViewModel @Inject constructor(
             }
             is MapEvent.UpdateLocation -> {
                 _state.value = state.value.copy(
-                    currentLocation = event.location
+                    currentLocation = event.location,
                 )
+                //event.cameraPositionState.move(CameraUpdateFactory.zoomOut())
             }
             is MapEvent.ToggleLocationTrackingService -> {
                 viewModelScope.launch {
@@ -323,20 +325,6 @@ class MapViewModel @Inject constructor(
                 }
                 _state.value = state.value.copy(
                     isInTrackingRouteState = !state.value.isInTrackingRouteState
-                )
-            }
-//            is MapEvent.StopLocationTrackingService -> {
-//                Intent(event.context, LocationService::class.java).apply {
-//                    action = LocationService.ACTION_STOP
-//                    ActivityCompat.startForegroundService(event.context, this)
-//                }
-//                _state.value = state.value.copy(
-//                    isInShowRouteState = false
-//                )
-//            }
-            is MapEvent.DrawPolylines -> {
-                _state.value = state.value.copy(
-                    drawPolylines = state.value.drawPolylines + event.latLng
                 )
             }
             is MapEvent.ToggleShowRouteState -> {

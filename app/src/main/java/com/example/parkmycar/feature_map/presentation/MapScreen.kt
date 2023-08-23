@@ -44,6 +44,7 @@ import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdate
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -132,8 +133,9 @@ fun MapScreen(
         for (currentLocation in result.locations) {
             viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
             locationSource.onLocationChanged(currentLocation)
-            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), zoomLevel.value)
-            cameraPositionState.position = cameraPosition
+            cameraPositionState.move(CameraUpdateFactory.newLatLng(LatLng(currentLocation.latitude, currentLocation.longitude)))
+//            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), zoomLevel.value)
+//            cameraPositionState.position = cameraPosition
         }
     }
 

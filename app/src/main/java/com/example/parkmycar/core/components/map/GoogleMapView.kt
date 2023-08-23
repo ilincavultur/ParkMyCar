@@ -63,7 +63,7 @@ fun GoogleMapView(
     locationSource: MyLocationSource,
     zoom: Float
 ) {
-    var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = true)) }
+    var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = false)) }
     var mapProperties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL, isMyLocationEnabled = true))
     }

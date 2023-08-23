@@ -36,7 +36,6 @@ sealed class MapEvent {
     data class ToggleLocationTrackingService(val context: Context): MapEvent()
 
     data class ToggleShowRouteState(val context: Context): MapEvent()
-    data class DrawPolylines(val latLng: List<LatLng>): MapEvent()
     //data class StopLocationTrackingService(val context: Context): MapEvent()
     //data class ComputeRoute(val source: String, val destination: String) : MapEvent()
 }
