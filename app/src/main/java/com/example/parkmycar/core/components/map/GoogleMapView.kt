@@ -65,14 +65,14 @@ fun GoogleMapView(
     val localContext = LocalContext.current
     // all of these into the viewmodel
 
-    val singaporeState = rememberMarkerState(position = singapore)
+    //val singaporeState = rememberMarkerState(position = singapore)
     val showParkingMarkers = remember { mutableStateOf(true) }
     val showCarMarkers = remember { mutableStateOf(true) }
 
-    var circleCenter by remember { mutableStateOf(singapore) }
-    if (singaporeState.dragState == DragState.END) {
-        circleCenter = singaporeState.position
-    }
+//    var circleCenter by remember { mutableStateOf(singapore) }
+//    if (singaporeState.dragState == DragState.END) {
+//        circleCenter = singaporeState.position
+//    }
 
     var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = false)) }
     var shouldAnimateZoom by remember { mutableStateOf(true) }

@@ -29,4 +29,6 @@ data class MapState(
     val defaultCameraPosition: CameraPosition = CameraPosition.fromLatLngZoom(singapore, 11f),
     val currentLocation: Location? = null,
     var isInShowRouteState: Boolean = false,
+    var isInTrackingRouteState: Boolean = false,
+    val drawPolylines: List<LatLng> = mutableListOf()
 )

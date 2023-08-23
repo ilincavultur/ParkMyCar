@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:name=".di.ParkMyCarApp"
@@ -17,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkMyCar"
         tools:targetApi="31" >
-
+        <service android:name=".feature_map.presentation.LocationService" android:foregroundServiceType="location" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

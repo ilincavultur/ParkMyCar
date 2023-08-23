@@ -1,16 +1,17 @@
 package com.example.parkmycar.feature_map.presentation
 
 import android.content.ContentValues.TAG
-import android.location.Location
+import android.content.Intent
 import android.util.Log
 import androidx.compose.runtime.*
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.parkmycar.core.util.Resource
 import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.example.parkmycar.feature_map.presentation.LocationService.Companion.ACTION_STOP
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -304,6 +305,49 @@ class MapViewModel @Inject constructor(
             is MapEvent.UpdateLocation -> {
                 _state.value = state.value.copy(
                     currentLocation = event.location
+                )
+            }
+            is MapEvent.ToggleLocationTrackingService -> {
+                viewModelScope.launch {
+                    Intent(event.context, LocationService::class.java).apply {
+                        action = if (state.value.isInTrackingRouteState) ACTION_STOP else LocationService.ACTION_START
+                        ActivityCompat.startForegroundService(event.context, this)
+                    }
+                }
+                _state.value = state.value.copy(
+                    isInTrackingRouteState = !state.value.isInTrackingRouteState
+                )
+            }
+//            is MapEvent.StopLocationTrackingService -> {
+//                Intent(event.context, LocationService::class.java).apply {
+//                    action = LocationService.ACTION_STOP
+//                    ActivityCompat.startForegroundService(event.context, this)
+//                }
+//                _state.value = state.value.copy(
+//                    isInShowRouteState = false
+//                )
+//            }
+            is MapEvent.DrawPolylines -> {
+                _state.value = state.value.copy(
+                    drawPolylines = state.value.drawPolylines + event.latLng
+                )
+            }
+            is MapEvent.ToggleShowRouteState -> {
+                if (state.value.isInTrackingRouteState) {
+                    viewModelScope.launch {
+                        Intent(event.context, LocationService::class.java).apply {
+                            action = ACTION_STOP
+                            ActivityCompat.startForegroundService(event.context, this)
+                        }
+                    }
+                }
+
+                _state.value = state.value.copy(
+                    isInShowRouteState = false,
+                    isInTrackingRouteState = false,
+                    path = mutableListOf()
+                    //isInShowRouteState = !state.value.isInShowRouteState,
+                    //drawPolylines = emptyList()
                 )
             }
         }

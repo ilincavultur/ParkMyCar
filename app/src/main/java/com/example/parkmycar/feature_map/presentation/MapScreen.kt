@@ -3,61 +3,47 @@ package com.example.parkmycar.feature_map.presentation
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.LocalActivityManager
-import android.content.ContentValues
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
 import android.provider.Settings
-import android.provider.Settings.ACTION_WIRELESS_SETTINGS
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.*
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.parkmycar.MainActivity
 import com.example.parkmycar.R
 import com.example.parkmycar.core.components.map.*
 import com.example.parkmycar.core.components.permission.CoarseLocationPermissionTextProvider
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
 import com.example.parkmycar.feature_map.domain.models.MarkerType
-import com.example.parkmycar.feature_map.domain.models.Spot
-import com.example.parkmycar.locationCallback
-import com.google.android.gms.location.*
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 
 private val permissionsToRequest = arrayOf(
@@ -105,6 +91,7 @@ fun MapScreen(
     var counter = 0
 
     val drawPolylines = mutableListOf<LatLng>()
+    //val drawPolylines = state.drawPolylines
 
     val cameraPositionState = rememberCameraPositionState {
         position = state.defaultCameraPosition
@@ -262,9 +249,11 @@ fun MapScreen(
 
                     state.path.forEach { latLng ->
                         Log.d(TAG, "MapScreen: " + latLng + "\n")
+                        //viewModel.onEvent(MapEvent.DrawPolylines(latLng))
                         drawPolylines += latLng
                     }
                     Polyline(
+                        //points = state.drawPolylines,
                         points = drawPolylines,
                         color = Color.Red,
                         width = 10f
@@ -288,11 +277,22 @@ fun MapScreen(
                 }
             }
             if (state.isInShowRouteState) {
-                Button(
-                    onClick = { /*TODO*/ },
+                Row(
                     modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
+                    Button(
+                        onClick = {
+                            viewModel.onEvent(MapEvent.ToggleLocationTrackingService(localContext))
+                        },
                     ) {
-                    Text(text = "Start Session")
+                        Text(text = if (state.isInTrackingRouteState) "Stop" else "Start")
+                    }
+                    Spacer(modifier = Modifier.size(20.dp))
+                    IconButton(onClick = {
+                        viewModel.onEvent(MapEvent.ToggleShowRouteState(localContext))
+                    }) {
+                        Icon(imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_close_24), contentDescription = "close")
+                    }
                 }
             }
         }
@@ -360,11 +360,11 @@ class MyLocationSource : LocationSource {
     }
 }
 
-fun newLocation(): Location {
-    val location = Location("MyLocationProvider")
-    location.apply {
-        latitude = singapore.latitude + Random.nextFloat()
-        longitude = singapore.longitude + Random.nextFloat()
-    }
-    return location
-}
+//fun newLocation(): Location {
+//    val location = Location("MyLocationProvider")
+//    location.apply {
+//        latitude = singapore.latitude + Random.nextFloat()
+//        longitude = singapore.longitude + Random.nextFloat()
+//    }
+//    return location
+//}

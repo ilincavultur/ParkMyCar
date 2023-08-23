@@ -1,5 +1,6 @@
 package com.example.parkmycar.feature_map.presentation
 
+import android.content.Context
 import android.location.Location
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.maps.model.LatLng
@@ -32,5 +33,10 @@ sealed class MapEvent {
 
     data class UpdateLocation(val location: Location): MapEvent()
 
+    data class ToggleLocationTrackingService(val context: Context): MapEvent()
+
+    data class ToggleShowRouteState(val context: Context): MapEvent()
+    data class DrawPolylines(val latLng: List<LatLng>): MapEvent()
+    //data class StopLocationTrackingService(val context: Context): MapEvent()
     //data class ComputeRoute(val source: String, val destination: String) : MapEvent()
 }
