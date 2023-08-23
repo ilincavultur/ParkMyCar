@@ -236,6 +236,10 @@ class MapViewModel @Inject constructor(
                 } else {
                     event.cameraPositionState.move(CameraUpdateFactory.zoomIn())
                 }
+
+                _state.value = state.value.copy(
+                    zoom = event.cameraPositionState.position.zoom
+                )
             }
             is MapEvent.OnZoomOutClick -> {
                 Log.d(TAG, "onEvent: OnZoomOutClick")
@@ -246,6 +250,9 @@ class MapViewModel @Inject constructor(
                 } else {
                     event.cameraPositionState.move(CameraUpdateFactory.zoomOut())
                 }
+                _state.value = state.value.copy(
+                    zoom = event.cameraPositionState.position.zoom
+                )
             }
             is MapEvent.OnSaveMarkerBtnClick -> {
                 Log.d(TAG, "onEvent: OnSaveMarkerBtnClick")

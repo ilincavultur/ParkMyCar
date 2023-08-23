@@ -21,6 +21,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,11 +41,16 @@ import com.example.parkmycar.core.components.permission.CoarseLocationPermission
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
 import com.example.parkmycar.feature_map.domain.models.MarkerType
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.LocationSource
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.flow.*
+import java.util.concurrent.TimeUnit
 
 
 private val permissionsToRequest = arrayOf(
@@ -93,11 +100,53 @@ fun MapScreen(
     val drawPolylines = mutableListOf<LatLng>()
     //val drawPolylines = state.drawPolylines
 
+    val locationSource = MyLocationSource()
+
+    //val zoomLevel = remember { mutableStateOf(state.zoom) }
+
+    val zoomLevel = remember { mutableStateOf(state.zoom) }
+
+
+
     val cameraPositionState = rememberCameraPositionState {
+        Log.d(TAG, "MapScreen: cur pos " + state.currentLocation?.latitude + state.currentLocation?.longitude)
         position = state.defaultCameraPosition
     }
 
-    val locationSource = MyLocationSource()
+    // Detect when the map starts moving and print the reason
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (cameraPositionState.isMoving) {
+            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
+        }
+    }
+
+
+
+
+    // The location request that defines the location updates
+    var locationRequest by remember {
+        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_LOW_POWER, TimeUnit.SECONDS.toMillis(3)).build())
+    }
+    LocationUpdatesEffect(locationRequest!!) { result ->
+        // For each result update the text
+        for (currentLocation in result.locations) {
+            viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
+            locationSource.onLocationChanged(currentLocation)
+            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), zoomLevel.value)
+            cameraPositionState.position = cameraPosition
+        }
+    }
+
+
+//    LaunchedEffect(Unit) {
+//        snapshotFlow { cameraPositionState.position.zoom }
+//            .collect { zoom ->
+//                if (zoom > 12.715378f) {
+//                    zoomLevel.value = zoom
+//                }
+//            }
+//    }
+
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -124,6 +173,7 @@ fun MapScreen(
             GoogleMapView(
                 modifier = Modifier.matchParentSize(),
                 cameraPositionState = cameraPositionState,
+                zoom = zoomLevel.value,
                 onMapLoaded = {
                     viewModel.onEvent(MapEvent.MapLoaded)
                 },
@@ -200,7 +250,7 @@ fun MapScreen(
                             snippet = "Short click to delete, \n Long Click to Open Control",
                             onInfoWindowClick = {
 //                                viewModel.onEvent(
-//                                    MapEvent.OnInfoWindowClick(spot)
+//                                     MapEvent.OnInfoWindowClick(spot)
 //                                )
                             },
                             onInfoWindowLongClick = {
@@ -217,6 +267,7 @@ fun MapScreen(
                     }
 
                     if (state.isAlertDialogDisplayed) {
+
                         RemoveFromDbDialog(
                             onConfirmButtonClick = {
                                 // remove from map and db
@@ -295,6 +346,64 @@ fun MapScreen(
                     }
                 }
             }
+
+            if (!state.isInShowRouteState) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                        ){
+                            val coroutineScope = rememberCoroutineScope()
+                            ZoomControls(
+                                onZoomOut = {
+                                    viewModel.onEvent(MapEvent.OnZoomOutClick(cameraPositionState))
+                                },
+                                onZoomIn = {
+                                    viewModel.onEvent(MapEvent.OnZoomInClick(cameraPositionState))
+                                }
+                            )
+                        }
+
+                        Column (
+                            horizontalAlignment = Alignment.End,
+                        ) {
+                            MapButton(
+                                text = "",
+                                onClick = {
+                                    viewModel.onEvent(MapEvent.OnSearchButtonClick)
+                                },
+                                icon = Icons.Default.Search
+                            )
+                        }
+                    }
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(30.dp)
+                    ) {
+                        MarkerToggles(
+                            onShowParkingSpotsToggleClick = { viewModel.onEvent(MapEvent.OnShowParkingSpotsToggleClick) },
+                            onHideParkingSpotsToggleClick = { viewModel.onEvent(MapEvent.OnHideParkingSpotsToggleClick) },
+                            onShowCarSpotsToggleClick = { viewModel.onEvent(MapEvent.OnShowCarSpotsToggleClick) },
+                            onHideCarSpotsToggleClick = { viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick) }
+                        )
+                    }
+
+                    //DebugView(cameraPositionState, singaporeState)
+                }
+            }
         }
     } else {
         LaunchedEffect(multiplePermissionResultLauncher) {
@@ -359,12 +468,3 @@ class MyLocationSource : LocationSource {
         listener?.onLocationChanged(location)
     }
 }
-
-//fun newLocation(): Location {
-//    val location = Location("MyLocationProvider")
-//    location.apply {
-//        latitude = singapore.latitude + Random.nextFloat()
-//        longitude = singapore.longitude + Random.nextFloat()
-//    }
-//    return location
-//}

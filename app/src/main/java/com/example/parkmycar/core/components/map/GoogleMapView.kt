@@ -61,47 +61,36 @@ fun GoogleMapView(
     onHideCarSpotsToggleClick: () -> Unit,
     updateLocation: (Location) -> Unit,
     locationSource: MyLocationSource,
+    zoom: Float
 ) {
-    val localContext = LocalContext.current
-    // all of these into the viewmodel
-
-    //val singaporeState = rememberMarkerState(position = singapore)
-    val showParkingMarkers = remember { mutableStateOf(true) }
-    val showCarMarkers = remember { mutableStateOf(true) }
-
-//    var circleCenter by remember { mutableStateOf(singapore) }
-//    if (singaporeState.dragState == DragState.END) {
-//        circleCenter = singaporeState.position
-//    }
-
-    var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = false)) }
-    var shouldAnimateZoom by remember { mutableStateOf(true) }
-    var ticker by remember { mutableStateOf(0) }
+    var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = true)) }
     var mapProperties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL, isMyLocationEnabled = true))
     }
 
-    // Detect when the map starts moving and print the reason
-    LaunchedEffect(cameraPositionState.isMoving) {
-        if (cameraPositionState.isMoving) {
-            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
-        }
-    }
-
-
-    // The location request that defines the location updates
-    var locationRequest by remember {
-        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build())
-    }
-    LocationUpdatesEffect(locationRequest!!) { result ->
-        // For each result update the text
-        for (currentLocation in result.locations) {
-            updateLocation(currentLocation)
-            locationSource.onLocationChanged(currentLocation)
-            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), 8F)
-            cameraPositionState.position = cameraPosition
-        }
-    }
+//    // Detect when the map starts moving and print the reason
+//    LaunchedEffect(cameraPositionState.isMoving) {
+//        if (cameraPositionState.isMoving) {
+//            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
+//        }
+//    }
+//
+//
+//
+//
+//    // The location request that defines the location updates
+//    var locationRequest by remember {
+//        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build())
+//    }
+//    LocationUpdatesEffect(locationRequest!!) { result ->
+//        // For each result update the text
+//        for (currentLocation in result.locations) {
+//            updateLocation(currentLocation)
+//            locationSource.onLocationChanged(currentLocation)
+////            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), 8f)
+////            cameraPositionState.position = cameraPosition
+//        }
+//    }
 
 
     GoogleMap(
@@ -121,120 +110,5 @@ fun GoogleMapView(
         content()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(10.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-            ){
-                val coroutineScope = rememberCoroutineScope()
-                ZoomControls(
-                    onZoomOut = {
-                        onZoomOutClick()
-                    },
-                    onZoomIn = {
-                        onZoomInClick()
-                    }
-                )
-            }
-
-            Column (
-                horizontalAlignment = Alignment.End,
-            ) {
-                MapButton(
-                    text = "",
-                    onClick = {
-                        onSearchIconClick()
-                              //viewModel.onEvent(MapEvent.OnSearchButtonClick)
-//                        mapProperties = mapProperties.copy(mapType = MapType.NORMAL)
-//                        cameraPositionState.position = defaultCameraPosition
-//                        singaporeState.position = singapore
-//                        singaporeState.hideInfoWindow()
-                    },
-                    icon = Icons.Default.Search
-                )
-            }
-        }
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(30.dp)
-        ) {
-            MarkerToggles(
-                onShowParkingSpotsToggleClick = { onShowParkingSpotsToggleClick() },
-                onHideParkingSpotsToggleClick = { onHideParkingSpotsToggleClick() },
-                onShowCarSpotsToggleClick = { onShowCarSpotsToggleClick() },
-                onHideCarSpotsToggleClick = { onHideCarSpotsToggleClick() }
-            )
-        }
-
-        //DebugView(cameraPositionState, singaporeState)
-    }
 }
 
-
-//@Composable
-//private fun MapTypeControls(
-//    onMapTypeClick: (MapType) -> Unit
-//) {
-//    Row(
-//        Modifier
-//            .fillMaxWidth()
-//            .horizontalScroll(state = ScrollState(0)),
-//        horizontalArrangement = Arrangement.Center
-//    ) {
-//
-//        MapTypeButton(type = MapType.NORMAL) {}
-//
-//    }
-//}
-
-//@Composable
-//private fun MapTypeButton(type: MapType, onClick: () -> Unit) =
-//    MapButton(text = type.toString(), onClick = onClick)
-
-
-
-
-
-@Composable
-private fun DebugView(
-    cameraPositionState: CameraPositionState,
-    markerState: MarkerState
-) {
-    Column(
-        Modifier
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        val moving =
-            if (cameraPositionState.isMoving) "moving" else "not moving"
-        Text(text = "Camera is $moving")
-        Text(text = "Camera position is ${cameraPositionState.position}")
-        Spacer(modifier = Modifier.height(4.dp))
-        val dragging =
-            if (markerState.dragState == DragState.DRAG) "dragging" else "not dragging"
-        Text(text = "Marker is $dragging")
-        Text(text = "Marker position is ${markerState.position}")
-    }
-}
-
-
-//@Preview
-//@Composable
-//fun GoogleMapViewPreview() {
-//    ParkMyCarTheme{
-//        GoogleMapView(Modifier.fillMaxSize())
-//    }
-//}

@@ -8,9 +8,9 @@ import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
-val singapore = LatLng(1.3588227, 103.8742114)
-val singapore2 = LatLng(1.40, 103.77)
-val singapore3 = LatLng(1.90, 110.0)
+//val singapore = LatLng(1.3588227, 103.8742114)
+//val singapore2 = LatLng(1.40, 103.77)
+//val singapore3 = LatLng(1.90, 110.0)
 
 data class MapState(
     var isLoading: Boolean = false,
@@ -26,9 +26,10 @@ data class MapState(
     var isMarkerControlDialogDisplayed: Boolean = false,
     var spotToBeControlled: Spot = Spot(),
     val shouldAnimateZoom: Boolean = true,
-    val defaultCameraPosition: CameraPosition = CameraPosition.fromLatLngZoom(singapore, 11f),
+    val defaultCameraPosition: CameraPosition = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 8f),
     val currentLocation: Location? = null,
     var isInShowRouteState: Boolean = false,
     var isInTrackingRouteState: Boolean = false,
-    val drawPolylines: List<LatLng> = mutableListOf()
+    val drawPolylines: List<LatLng> = mutableListOf(),
+    val zoom: Float = 8f,
 )

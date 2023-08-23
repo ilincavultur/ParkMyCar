@@ -15,7 +15,6 @@ import com.example.parkmycar.feature_map.data.toSpot
 import com.example.parkmycar.feature_map.data.toSpotEntity
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.repository.SpotRepository
-import com.example.parkmycar.feature_map.presentation.singapore3
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.crashlytics.buildtools.reloc.org.apache.http.HttpException
 import com.google.maps.android.PolyUtil
