@@ -91,38 +91,21 @@ fun MapScreen(
             }
         }
     )
-
-
-
-    val scope = rememberCoroutineScope()
-
-    var counter = 0
-
     val drawPolylines = mutableListOf<LatLng>()
-    //val drawPolylines = state.drawPolylines
-
     val locationSource = MyLocationSource()
-
-    //val zoomLevel = remember { mutableStateOf(state.zoom) }
-
-    val zoomLevel = remember { mutableStateOf(state.zoom) }
-
-
-
+    val firstLocation = remember {
+      mutableStateOf(true)
+    }
     val cameraPositionState = rememberCameraPositionState {
-        Log.d(TAG, "MapScreen: cur pos " + state.currentLocation?.latitude + state.currentLocation?.longitude)
         position = state.defaultCameraPosition
     }
 
-    // Detect when the map starts moving and print the reason
-    LaunchedEffect(cameraPositionState.isMoving) {
-        if (cameraPositionState.isMoving) {
-            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
-        }
-    }
-
-
-
+//    // Detect when the map starts moving and print the reason
+//    LaunchedEffect(cameraPositionState.isMoving) {
+//        if (cameraPositionState.isMoving) {
+//            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
+//        }
+//    }
 
     // The location request that defines the location updates
     var locationRequest by remember {
@@ -130,25 +113,37 @@ fun MapScreen(
     }
     LocationUpdatesEffect(locationRequest!!) { result ->
         // For each result update the text
-        for (currentLocation in result.locations) {
-            viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
-            locationSource.onLocationChanged(currentLocation)
-            cameraPositionState.move(CameraUpdateFactory.newLatLng(LatLng(currentLocation.latitude, currentLocation.longitude)))
-//            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), zoomLevel.value)
-//            cameraPositionState.position = cameraPosition
+        if (!state.isInTrackingRouteState) {
+            for (currentLocation in result.locations) {
+                viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
+                locationSource.onLocationChanged(currentLocation)
+                if (firstLocation.value) {
+                    cameraPositionState.move(
+                        CameraUpdateFactory.newLatLng(
+                            LatLng(
+                                currentLocation.latitude,
+                                currentLocation.longitude
+                            )
+                        )
+                    )
+                    firstLocation.value = false
+                }
+            }
+        } else {
+            for (currentLocation in result.locations) {
+                viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
+                locationSource.onLocationChanged(currentLocation)
+                cameraPositionState.move(
+                    CameraUpdateFactory.newLatLng(
+                        LatLng(
+                            currentLocation.latitude,
+                            currentLocation.longitude
+                        )
+                    )
+                )
+            }
         }
     }
-
-
-//    LaunchedEffect(Unit) {
-//        snapshotFlow { cameraPositionState.position.zoom }
-//            .collect { zoom ->
-//                if (zoom > 12.715378f) {
-//                    zoomLevel.value = zoom
-//                }
-//            }
-//    }
-
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -175,38 +170,13 @@ fun MapScreen(
             GoogleMapView(
                 modifier = Modifier.matchParentSize(),
                 cameraPositionState = cameraPositionState,
-                zoom = zoomLevel.value,
                 onMapLoaded = {
                     viewModel.onEvent(MapEvent.MapLoaded)
                 },
                 onMapLongClick = { latLng ->
                     viewModel.onEvent(MapEvent.OnMapLongClick(latLng))
                 },
-                onZoomOutClick = {
-                    viewModel.onEvent(MapEvent.OnZoomOutClick(cameraPositionState))
-                },
-                onZoomInClick = {
-                    viewModel.onEvent(MapEvent.OnZoomInClick(cameraPositionState))
-                },
-                onSearchIconClick = {
-                    viewModel.onEvent(MapEvent.OnSearchButtonClick)
-                },
-                onShowParkingSpotsToggleClick = {
-                    viewModel.onEvent(MapEvent.OnShowParkingSpotsToggleClick)
-                },
-                onHideParkingSpotsToggleClick = {
-                    viewModel.onEvent(MapEvent.OnHideParkingSpotsToggleClick)
-                },
-                onShowCarSpotsToggleClick = {
-                    viewModel.onEvent(MapEvent.OnShowCarSpotsToggleClick)
-                },
-                onHideCarSpotsToggleClick = {
-                    viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick)
-                },
                 locationSource = locationSource,
-                updateLocation = {
-                   viewModel.onEvent(MapEvent.UpdateLocation(it))
-                },
                 content = {
                     viewModel.state.value.spots.forEach { spot ->
                         Marker(
@@ -402,8 +372,6 @@ fun MapScreen(
                             onHideCarSpotsToggleClick = { viewModel.onEvent(MapEvent.OnHideCarSpotsToggleClick) }
                         )
                     }
-
-                    //DebugView(cameraPositionState, singaporeState)
                 }
             }
         }

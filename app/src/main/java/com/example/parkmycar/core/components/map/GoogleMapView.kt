@@ -52,46 +52,12 @@ fun GoogleMapView(
     onMapLoaded: () -> Unit = {},
     content: @Composable () -> Unit = {},
     onMapLongClick: (LatLng) -> Unit,
-    onZoomOutClick: () -> Unit,
-    onZoomInClick: () -> Unit,
-    onSearchIconClick: () -> Unit,
-    onShowParkingSpotsToggleClick: () -> Unit,
-    onHideParkingSpotsToggleClick: () -> Unit,
-    onShowCarSpotsToggleClick: () -> Unit,
-    onHideCarSpotsToggleClick: () -> Unit,
-    updateLocation: (Location) -> Unit,
     locationSource: MyLocationSource,
-    zoom: Float
 ) {
     var uiSettings by remember { mutableStateOf(MapUiSettings(compassEnabled = false, zoomControlsEnabled = false)) }
     var mapProperties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL, isMyLocationEnabled = true))
     }
-
-//    // Detect when the map starts moving and print the reason
-//    LaunchedEffect(cameraPositionState.isMoving) {
-//        if (cameraPositionState.isMoving) {
-//            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
-//        }
-//    }
-//
-//
-//
-//
-//    // The location request that defines the location updates
-//    var locationRequest by remember {
-//        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build())
-//    }
-//    LocationUpdatesEffect(locationRequest!!) { result ->
-//        // For each result update the text
-//        for (currentLocation in result.locations) {
-//            updateLocation(currentLocation)
-//            locationSource.onLocationChanged(currentLocation)
-////            val cameraPosition = CameraPosition.fromLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), 8f)
-////            cameraPositionState.position = cameraPosition
-//        }
-//    }
-
 
     GoogleMap(
         modifier = modifier,
