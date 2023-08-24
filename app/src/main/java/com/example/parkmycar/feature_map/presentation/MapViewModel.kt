@@ -97,10 +97,7 @@ class MapViewModel @Inject constructor(
             }
             MapEvent.OnShowCarSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnShowCarSpotsToggleClick")
-//                searchJob?.cancel()
-//                searchJob =
                     viewModelScope.launch {
-                    //delay(500L)
                     parkingUseCases.getSavedSpots()
                         .onEach { result ->
                             when(result) {
@@ -139,7 +136,6 @@ class MapViewModel @Inject constructor(
             MapEvent.OnShowParkingSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnShowParkingSpotsToggleClick")
                 viewModelScope.launch {
-                //delay(500L)
                 parkingUseCases.getSavedSpots()
                     .onEach { result ->
                         when(result) {
@@ -212,9 +208,6 @@ class MapViewModel @Inject constructor(
                 }
                 loadMarkers()
             }
-//            is MapEvent.RemoveMarkerFromMap -> {
-//                Log.d(TAG, "onEvent: RemoveMarkerFromMap")
-//            }
             MapEvent.OnDismissRemoveMarkerFromDbClick -> {
                 Log.d(TAG, "onEvent: OnDismissRemoveMarkerFromDbClick")
                 _state.value = state.value.copy(
@@ -282,7 +275,6 @@ class MapViewModel @Inject constructor(
                             is Resource.Error -> {
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
-                                    //path = state.value.path.plus(result.data ?: emptyList()),
                                     isLoading = false,
                                     isInShowRouteState = true
                                 )
@@ -314,7 +306,6 @@ class MapViewModel @Inject constructor(
                 _state.value = state.value.copy(
                     currentLocation = event.location,
                 )
-                //event.cameraPositionState.move(CameraUpdateFactory.zoomOut())
             }
             is MapEvent.ToggleLocationTrackingService -> {
                 viewModelScope.launch {
@@ -341,8 +332,6 @@ class MapViewModel @Inject constructor(
                     isInShowRouteState = false,
                     isInTrackingRouteState = false,
                     path = mutableListOf()
-                    //isInShowRouteState = !state.value.isInShowRouteState,
-                    //drawPolylines = emptyList()
                 )
             }
         }
@@ -385,7 +374,6 @@ class MapViewModel @Inject constructor(
 
     private fun loadParkingLots() {
         viewModelScope.launch {
-            //delay(500L)
             parkingUseCases.findParkingLots()
                 .onEach { result ->
                     when(result) {

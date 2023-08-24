@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 class DefaultLocationClient(
     private val context: Context,
     private val client: FusedLocationProviderClient,
-    //private val cameraPositionState: CameraPositionState
 ): LocationClient {
 
     @SuppressLint("MissingPermission")
