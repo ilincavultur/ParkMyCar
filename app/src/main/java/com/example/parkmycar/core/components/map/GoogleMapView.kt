@@ -71,7 +71,7 @@ fun GoogleMapView(
         onMapLongClick = { LatLng ->
             onMapLongClick(LatLng)
         },
-        locationSource = locationSource
+        //locationSource = locationSource
     ) {
         content()
     }

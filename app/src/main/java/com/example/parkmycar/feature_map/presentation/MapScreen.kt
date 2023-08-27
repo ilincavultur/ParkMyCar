@@ -41,7 +41,10 @@ import com.example.parkmycar.core.components.permission.CoarseLocationPermission
 import com.example.parkmycar.core.components.permission.CustomPermissionDialog
 import com.example.parkmycar.core.components.permission.FineLocationPermissionTextProvider
 import com.example.parkmycar.feature_map.domain.models.MarkerType
+import com.example.parkmycar.fusedLocationClient
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -53,11 +56,12 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.flow.*
 import java.util.concurrent.TimeUnit
 
-
+val locationSource = MyLocationSource()
 private val permissionsToRequest = arrayOf(
     Manifest.permission.ACCESS_COARSE_LOCATION,
     Manifest.permission.ACCESS_FINE_LOCATION,
 )
+
 
 internal fun Context.findActivity(): Activity {
     var context = this
@@ -92,7 +96,7 @@ fun MapScreen(
         }
     )
     val drawPolylines = mutableListOf<LatLng>()
-    val locationSource = MyLocationSource()
+
     val firstLocation = remember {
       mutableStateOf(true)
     }
@@ -100,6 +104,13 @@ fun MapScreen(
         position = state.defaultCameraPosition
     }
 
+    fusedLocationClient.lastLocation
+        .addOnSuccessListener { location : Location? ->
+            if (location != null) {
+                viewModel.onEvent(MapEvent.UpdateLocation(location))
+            }
+
+        }
 //    // Detect when the map starts moving and print the reason
 //    LaunchedEffect(cameraPositionState.isMoving) {
 //        if (cameraPositionState.isMoving) {
@@ -107,42 +118,101 @@ fun MapScreen(
 //        }
 //    }
 
+
+    //viewModel.onEvent(MapEvent.ToggleLocationTrackingService(localContext))
     // The location request that defines the location updates
-    var locationRequest by remember {
-        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_LOW_POWER, TimeUnit.SECONDS.toMillis(3)).build())
-    }
-    LocationUpdatesEffect(locationRequest!!) { result ->
-        // For each result update the text
-        if (!state.isInTrackingRouteState) {
-            for (currentLocation in result.locations) {
-                viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
-                locationSource.onLocationChanged(currentLocation)
+//    var locationRequest by remember {
+//        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_LOW_POWER, TimeUnit.SECONDS.toMillis(3)).build())
+//    }
+//
+////    DisposableEffect(state.currentLocation) {
+////        state.currentLocation?.let { locationSource.onLocationChanged(it) }
+////        onDispose {
+////
+////        }
+////    }
+//        LocationUpdatesEffect(locationRequest!!) { result ->
+//            for (currentLocation in result.locations) {
+//                locationSource.onLocationChanged(currentLocation)
+//                viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
+//
+//                if (firstLocation.value) {
+//                    cameraPositionState.move(
+//                        CameraUpdateFactory.newLatLng(
+//                            LatLng(
+//                                currentLocation.latitude,
+//                                currentLocation.longitude
+//                            )
+//                        )
+//                    )
+//                    firstLocation.value = false
+//                }
+//            }
+//
+//            // For each result update the text
+////            if (!state.isInTrackingRouteState) {
+////                for (currentLocation in result.locations) {
+////                    viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
+////                    locationSource.onLocationChanged(currentLocation)
+////                    if (firstLocation.value) {
+////                        cameraPositionState.move(
+////                            CameraUpdateFactory.newLatLng(
+////                                LatLng(
+////                                    currentLocation.latitude,
+////                                    currentLocation.longitude
+////                                )
+////                            )
+////                        )
+////                        firstLocation.value = false
+////                    }
+////                }
+////            } else {
+////                for (currentLocation in result.locations) {
+////                    viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
+////                    locationSource.onLocationChanged(currentLocation)
+////                    cameraPositionState.move(
+////                        CameraUpdateFactory.newLatLng(
+////                            LatLng(
+////                                currentLocation.latitude,
+////                                currentLocation.longitude
+////                            )
+////                        )
+////                    )
+////                }
+////            }
+//        }
+//
+//
+//
+//    // Update blue dot and camera when the location changes
+    LaunchedEffect(state.currentLocation) {
+        Log.d(TAG, "Updating blue dot on map...")
+        state.currentLocation?.let {
+            locationSource.onLocationChanged(it)
+            if (!state.isInTrackingRouteState) {
                 if (firstLocation.value) {
                     cameraPositionState.move(
                         CameraUpdateFactory.newLatLng(
                             LatLng(
-                                currentLocation.latitude,
-                                currentLocation.longitude
+                                it.latitude,
+                                it.longitude
                             )
                         )
                     )
                     firstLocation.value = false
                 }
-            }
-        } else {
-            for (currentLocation in result.locations) {
-                viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
-                locationSource.onLocationChanged(currentLocation)
+            } else {
                 cameraPositionState.move(
                     CameraUpdateFactory.newLatLng(
                         LatLng(
-                            currentLocation.latitude,
-                            currentLocation.longitude
+                            it.latitude,
+                            it.longitude
                         )
                     )
                 )
             }
         }
+
     }
 
     LaunchedEffect(key1 = true) {
@@ -275,6 +345,14 @@ fun MapScreen(
                         //viewModel.onEvent(MapEvent.DrawPolylines(latLng))
                         drawPolylines += latLng
                     }
+//                    if (state.currentLocation!= null) {
+//                        state.path.forEach { latLng ->
+//                            if (latLng.contains(LatLng(state.currentLocation.latitude, state.currentLocation.longitude))) {
+//                                drawPolylines -= latLng
+//                            }
+//                        }
+//                    }
+
                     Polyline(
                         //points = state.drawPolylines,
                         points = drawPolylines,

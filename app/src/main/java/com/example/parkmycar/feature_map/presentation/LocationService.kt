@@ -9,6 +9,7 @@ import android.os.IBinder
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.example.parkmycar.R
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ import kotlinx.coroutines.flow.onEach
 class LocationService: Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private lateinit var locationClient: LocationClient
+    lateinit var locationClient: LocationClient
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -58,9 +59,11 @@ class LocationService: Service() {
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
                 val lat = location.latitude.toString()
-                val long = location.longitude.toString()
+                val lng = location.longitude.toString()
+//                lat = location.latitude.toString()
+//                lng = location.longitude.toString()
                 val updatedNotification = notification.setContentText(
-                    "Location: ($lat, $long)"
+                    "Location: ($lat, $lng)"
                 )
                 notificationManager.notify(1, updatedNotification.build())
             }
@@ -83,5 +86,7 @@ class LocationService: Service() {
     companion object {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
+        var lat = ""
+        var lng = ""
     }
 }

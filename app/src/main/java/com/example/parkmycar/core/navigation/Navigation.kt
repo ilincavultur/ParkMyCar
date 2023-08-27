@@ -1,5 +1,6 @@
 package com.example.parkmycar.core.navigation
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import com.example.parkmycar.feature_saved_parking_lots.presentation.SavedParkin
 import com.example.parkmycar.feature_saved_spots.presentation.SavedCarSpotsScreen
 import com.example.parkmycar.feature_splash_screen.presentation.SplashScreen
 
+@SuppressLint("MissingPermission")
 @Composable
 fun Navigation(
     navController: NavHostController,

@@ -17,21 +17,18 @@ import com.example.parkmycar.core.components.AppScaffold
 import com.example.parkmycar.core.navigation.Navigation
 
 import com.example.parkmycar.ui.theme.ParkMyCarTheme
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import dagger.hilt.android.AndroidEntryPoint
 
 lateinit var locationCallback: LocationCallback
-
+lateinit var fusedLocationClient: FusedLocationProviderClient
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         //installSplashScreen()
 
         super.onCreate(savedInstanceState)
-
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setContent {
             ParkMyCarTheme {
                 AppScaffold()

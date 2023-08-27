@@ -8,10 +8,6 @@ import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
-//val singapore = LatLng(1.3588227, 103.8742114)
-//val singapore2 = LatLng(1.40, 103.77)
-//val singapore3 = LatLng(1.90, 110.0)
-
 data class MapState(
     var isLoading: Boolean = false,
     val spots: List<Spot> = emptyList(),
@@ -30,5 +26,4 @@ data class MapState(
     val currentLocation: Location? = null,
     var isInShowRouteState: Boolean = false,
     var isInTrackingRouteState: Boolean = false,
-    val zoom: Float = 8f,
 )

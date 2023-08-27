@@ -3,6 +3,7 @@ package com.example.parkmycar.feature_map.presentation
 import android.content.Context
 import android.location.Location
 import com.example.parkmycar.feature_map.domain.models.Spot
+import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 

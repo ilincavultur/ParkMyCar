@@ -60,3 +60,44 @@ fun LocationUpdatesEffect(
         }
     }
 }
+
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
+@Composable
+fun LocationUpdatesEffectBackground(
+    locationRequest: LocationRequest,
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    onUpdate: (result: LocationResult) -> Unit,
+) {
+    val context = LocalContext.current
+    val currentOnUpdate by rememberUpdatedState(newValue = onUpdate)
+
+    // Whenever on of these parameters changes, dispose and restart the effect.
+    DisposableEffect(locationRequest, lifecycleOwner) {
+        val locationClient = LocationServices.getFusedLocationProviderClient(context)
+        val locationCallback: LocationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                currentOnUpdate(result)
+            }
+        }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                locationClient.requestLocationUpdates(
+                    locationRequest, locationCallback, Looper.getMainLooper(),
+                )
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                locationClient.removeLocationUpdates(locationCallback)
+            }
+        }
+
+        // Add the observer to the lifecycle
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // When the effect leaves the Composition, remove the observer
+        onDispose {
+            locationClient.removeLocationUpdates(locationCallback)
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}

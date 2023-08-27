@@ -11,6 +11,7 @@ import com.example.parkmycar.core.util.Resource
 import com.example.parkmycar.feature_map.domain.models.MarkerType
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.usecases.ParkingUseCases
+import com.example.parkmycar.feature_map.presentation.LocationService.Companion.ACTION_START
 import com.example.parkmycar.feature_map.presentation.LocationService.Companion.ACTION_STOP
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -231,9 +232,6 @@ class MapViewModel @Inject constructor(
                     event.cameraPositionState.move(CameraUpdateFactory.zoomIn())
                 }
 
-                _state.value = state.value.copy(
-                    zoom = event.cameraPositionState.position.zoom
-                )
             }
             is MapEvent.OnZoomOutClick -> {
                 Log.d(TAG, "onEvent: OnZoomOutClick")
@@ -244,9 +242,6 @@ class MapViewModel @Inject constructor(
                 } else {
                     event.cameraPositionState.move(CameraUpdateFactory.zoomOut())
                 }
-                _state.value = state.value.copy(
-                    zoom = event.cameraPositionState.position.zoom
-                )
             }
             is MapEvent.OnSaveMarkerBtnClick -> {
                 Log.d(TAG, "onEvent: OnSaveMarkerBtnClick")
@@ -276,7 +271,8 @@ class MapViewModel @Inject constructor(
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
                                     isLoading = false,
-                                    isInShowRouteState = true
+                                    isInShowRouteState = true,
+                                    //isMarkerControlDialogDisplayed = false
                                 )
                                 _eventFlow.emit(
                                     MapUiEvent.ShowSnackbar(
@@ -288,14 +284,16 @@ class MapViewModel @Inject constructor(
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
                                     isLoading = true,
-                                    isInShowRouteState = true
+                                    isInShowRouteState = true,
+                                    //isMarkerControlDialogDisplayed = false
                                 )
                             }
                             is Resource.Success -> {
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
                                     isLoading = false,
-                                    isInShowRouteState = true
+                                    isInShowRouteState = true,
+                                    //isMarkerControlDialogDisplayed = false
                                 )
                             }
                         }
@@ -305,12 +303,21 @@ class MapViewModel @Inject constructor(
             is MapEvent.UpdateLocation -> {
                 _state.value = state.value.copy(
                     currentLocation = event.location,
+                    path = if (state.value.path.isNotEmpty() && state.value.path.size >= 2) {
+                        val newPath = mutableListOf<List<LatLng>>()
+                        for (i in state.value.path.indices) {
+                            if (i != 0 && i != 1) {
+                                newPath.add(state.value.path[i])
+                            }
+                        }
+                        newPath
+                    } else state.value.path
                 )
             }
             is MapEvent.ToggleLocationTrackingService -> {
                 viewModelScope.launch {
                     Intent(event.context, LocationService::class.java).apply {
-                        action = if (state.value.isInTrackingRouteState) ACTION_STOP else LocationService.ACTION_START
+                        action = if (state.value.isInTrackingRouteState) ACTION_STOP else ACTION_START
                         ActivityCompat.startForegroundService(event.context, this)
                     }
                 }
