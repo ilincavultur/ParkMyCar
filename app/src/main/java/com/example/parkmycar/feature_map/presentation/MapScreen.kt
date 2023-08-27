@@ -104,86 +104,16 @@ fun MapScreen(
         position = state.defaultCameraPosition
     }
 
-    fusedLocationClient.lastLocation
-        .addOnSuccessListener { location : Location? ->
-            if (location != null) {
-                viewModel.onEvent(MapEvent.UpdateLocation(location))
+    LaunchedEffect(true) {
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                if (location != null) {
+                    viewModel.onEvent(MapEvent.UpdateLocation(location))
+                }
             }
-
-        }
-//    // Detect when the map starts moving and print the reason
-//    LaunchedEffect(cameraPositionState.isMoving) {
-//        if (cameraPositionState.isMoving) {
-//            Log.d(TAG, "Map camera started moving due to ${cameraPositionState.cameraMoveStartedReason.name}")
-//        }
-//    }
+    }
 
 
-    //viewModel.onEvent(MapEvent.ToggleLocationTrackingService(localContext))
-    // The location request that defines the location updates
-//    var locationRequest by remember {
-//        mutableStateOf<LocationRequest?>(LocationRequest.Builder(Priority.PRIORITY_LOW_POWER, TimeUnit.SECONDS.toMillis(3)).build())
-//    }
-//
-////    DisposableEffect(state.currentLocation) {
-////        state.currentLocation?.let { locationSource.onLocationChanged(it) }
-////        onDispose {
-////
-////        }
-////    }
-//        LocationUpdatesEffect(locationRequest!!) { result ->
-//            for (currentLocation in result.locations) {
-//                locationSource.onLocationChanged(currentLocation)
-//                viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
-//
-//                if (firstLocation.value) {
-//                    cameraPositionState.move(
-//                        CameraUpdateFactory.newLatLng(
-//                            LatLng(
-//                                currentLocation.latitude,
-//                                currentLocation.longitude
-//                            )
-//                        )
-//                    )
-//                    firstLocation.value = false
-//                }
-//            }
-//
-//            // For each result update the text
-////            if (!state.isInTrackingRouteState) {
-////                for (currentLocation in result.locations) {
-////                    viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
-////                    locationSource.onLocationChanged(currentLocation)
-////                    if (firstLocation.value) {
-////                        cameraPositionState.move(
-////                            CameraUpdateFactory.newLatLng(
-////                                LatLng(
-////                                    currentLocation.latitude,
-////                                    currentLocation.longitude
-////                                )
-////                            )
-////                        )
-////                        firstLocation.value = false
-////                    }
-////                }
-////            } else {
-////                for (currentLocation in result.locations) {
-////                    viewModel.onEvent(MapEvent.UpdateLocation(currentLocation))
-////                    locationSource.onLocationChanged(currentLocation)
-////                    cameraPositionState.move(
-////                        CameraUpdateFactory.newLatLng(
-////                            LatLng(
-////                                currentLocation.latitude,
-////                                currentLocation.longitude
-////                            )
-////                        )
-////                    )
-////                }
-////            }
-//        }
-//
-//
-//
 //    // Update blue dot and camera when the location changes
     LaunchedEffect(state.currentLocation) {
         Log.d(TAG, "Updating blue dot on map...")

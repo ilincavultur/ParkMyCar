@@ -301,9 +301,43 @@ class MapViewModel @Inject constructor(
                 }
             }
             is MapEvent.UpdateLocation -> {
-                _state.value = state.value.copy(
-                    currentLocation = event.location,
-                    path = if (state.value.path.isNotEmpty() && state.value.path.size >= 2) {
+
+//                _state.value = state.value.copy(
+//                    currentLocation = event.location,
+//                )
+
+                viewModelScope.launch {
+//                    val newPath = mutableListOf<List<LatLng>>()
+//                    state.value.path.forEachIndexed { index, latLngs ->
+//                        var newNewPath = listOf<LatLng>()
+//                        latLngs.forEachIndexed { idxx, latLng ->
+//                            if (latLng.latitude != event.location.latitude && latLng.longitude != event.location.longitude) {
+//                                newNewPath = newNewPath.plus(latLng)
+//                            }
+//                        }
+//                        if (newNewPath.isNotEmpty()) {
+//                            newPath.add(index, newNewPath)
+//                        }
+//                    }
+                    val newPath = mutableListOf<List<LatLng>>()
+                    for (i in state.value.path.indices) {
+                        if (i != 0 && i != 1) {
+                            newPath.add(state.value.path[i])
+                        }
+                    }
+
+                    _state.value = state.value.copy(
+                        currentLocation = event.location,
+                        path = newPath
+                    )
+                }
+
+
+                //if (state.value.path.isNotEmpty() && state.value.path.size >= 1) {
+
+                //}
+                /*
+                path = if (state.value.path.isNotEmpty() && state.value.path.size >= 2) {
                         val newPath = mutableListOf<List<LatLng>>()
                         for (i in state.value.path.indices) {
                             if (i != 0 && i != 1) {
@@ -312,7 +346,7 @@ class MapViewModel @Inject constructor(
                         }
                         newPath
                     } else state.value.path
-                )
+                 */
             }
             is MapEvent.ToggleLocationTrackingService -> {
                 viewModelScope.launch {
