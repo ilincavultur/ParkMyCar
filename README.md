@@ -1,9 +1,10 @@
 # ParkMyCar
-MVVM + Clean Architecture (usecases) + Android + Kotlin + Jetpack Compose App to never again forget where you have parked your car!
-The user can also find nearby parking lots. 
-The user can request to get route towards spots and follow the routes using a foreground service for location tracking. 
-The user can save spots for later or remove them from the database to save some space.
-Splash screen using Lottie animation.
+MVVM + Clean Architecture (usecases) + Android + Kotlin + Jetpack Compose App to never again forget where you have parked your car! <br>
+The user can also find nearby parking lots. <br>
+The user can request to get route towards spots and follow the routes using a foreground service for location tracking. <br>
+The user can save spots for later or remove them from the database to save some space. <br>
+Splash screen using Lottie animation. <br>
+Custom Google Map. <br>
 
 <img width="350" alt="Screenshot 2023-09-15 at 17 32 24" src="https://github.com/ilincavultur/ParkMyCar/assets/41162207/9bd99bc2-ac21-44e6-a456-bb56871cce4f">
 
