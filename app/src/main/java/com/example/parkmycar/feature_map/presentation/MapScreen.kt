@@ -104,23 +104,36 @@ fun MapScreen(
         position = state.defaultCameraPosition
     }
 
-    LaunchedEffect(true) {
+    //LaunchedEffect(true) {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location : Location? ->
                 if (location != null) {
+                    Log.d(TAG, "MapScreen: UpdateLocation")
                     viewModel.onEvent(MapEvent.UpdateLocation(location))
                 }
             }
-    }
+    //}
 
 
 //    // Update blue dot and camera when the location changes
     LaunchedEffect(state.currentLocation) {
         Log.d(TAG, "Updating blue dot on map...")
-        state.currentLocation?.let {
-            locationSource.onLocationChanged(it)
-            if (!state.isInTrackingRouteState) {
-                if (firstLocation.value) {
+        if (state.isMapLoaded) {
+            state.currentLocation?.let {
+                locationSource.onLocationChanged(it)
+                if (!state.isInTrackingRouteState) {
+                    if (firstLocation.value) {
+                        cameraPositionState.move(
+                            CameraUpdateFactory.newLatLng(
+                                LatLng(
+                                    it.latitude,
+                                    it.longitude
+                                )
+                            )
+                        )
+                        firstLocation.value = false
+                    }
+                } else {
                     cameraPositionState.move(
                         CameraUpdateFactory.newLatLng(
                             LatLng(
@@ -129,20 +142,9 @@ fun MapScreen(
                             )
                         )
                     )
-                    firstLocation.value = false
                 }
-            } else {
-                cameraPositionState.move(
-                    CameraUpdateFactory.newLatLng(
-                        LatLng(
-                            it.latitude,
-                            it.longitude
-                        )
-                    )
-                )
             }
         }
-
     }
 
     LaunchedEffect(key1 = true) {

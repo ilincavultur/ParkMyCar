@@ -20,6 +20,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
+import kotlin.math.*
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -301,52 +302,33 @@ class MapViewModel @Inject constructor(
                 }
             }
             is MapEvent.UpdateLocation -> {
-
-//                _state.value = state.value.copy(
-//                    currentLocation = event.location,
-//                )
-
+                var newPath = mutableListOf<List<LatLng>>()
                 viewModelScope.launch {
-//                    val newPath = mutableListOf<List<LatLng>>()
-//                    state.value.path.forEachIndexed { index, latLngs ->
-//                        var newNewPath = listOf<LatLng>()
-//                        latLngs.forEachIndexed { idxx, latLng ->
-//                            if (latLng.latitude != event.location.latitude && latLng.longitude != event.location.longitude) {
-//                                newNewPath = newNewPath.plus(latLng)
-//                            }
-//                        }
-//                        if (newNewPath.isNotEmpty()) {
-//                            newPath.add(index, newNewPath)
-//                        }
-//                    }
-                    val newPath = mutableListOf<List<LatLng>>()
-                    for (i in state.value.path.indices) {
-                        if (i != 0 && i != 1) {
-                            newPath.add(state.value.path[i])
-                        }
-                    }
+                    if (state.value.path.isNotEmpty() && state.value.path.first().size >= 2) {
+                        val currentPath = state.value.path.first()
+                        val distanceFirstLatLng = distance(state.value.path.first()[0].latitude, state.value.path.first()[0].longitude, event.location.latitude, event.location.longitude)
+                        val distanceSecondLatLng = distance(state.value.path.first()[1].latitude, state.value.path.first()[1].longitude, event.location.latitude, event.location.longitude)
 
+                        val size = state.value.path.first().size-1
+                        newPath = mutableListOf(
+                            if (distanceFirstLatLng < 0.1 || distanceSecondLatLng < 0.1) {
+                                state.value.path.first().slice(indices = IntRange(2,size))
+                            } else {
+                                currentPath
+                            }
+
+                        )
+                    }
+                }
+
+                _state.value = state.value.copy(
+                    currentLocation = event.location,
+                )
+                if (newPath.isNotEmpty()) {
                     _state.value = state.value.copy(
-                        currentLocation = event.location,
                         path = newPath
                     )
                 }
-
-
-                //if (state.value.path.isNotEmpty() && state.value.path.size >= 1) {
-
-                //}
-                /*
-                path = if (state.value.path.isNotEmpty() && state.value.path.size >= 2) {
-                        val newPath = mutableListOf<List<LatLng>>()
-                        for (i in state.value.path.indices) {
-                            if (i != 0 && i != 1) {
-                                newPath.add(state.value.path[i])
-                            }
-                        }
-                        newPath
-                    } else state.value.path
-                 */
             }
             is MapEvent.ToggleLocationTrackingService -> {
                 viewModelScope.launch {
@@ -445,4 +427,21 @@ class MapViewModel @Inject constructor(
             loadMarkers()
         }
     }
+}
+
+private fun distance(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+    val earthRadius = 3958.75 // in miles, change to 6371 for kilometer output
+
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLng = Math.toRadians(lng2 - lng1)
+
+    val sindLat = sin(dLat / 2)
+    val sindLng = sin(dLng / 2)
+
+    val a = sindLat.pow(2.0) +
+            (sindLng.pow(2.0) * cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)))
+
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return earthRadius * c // output distance, in MILES
 }

@@ -16,7 +16,6 @@ import com.example.parkmycar.feature_map.data.toSpotEntity
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.example.parkmycar.feature_map.domain.repository.SpotRepository
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.crashlytics.buildtools.reloc.org.apache.http.HttpException
 import com.google.maps.android.PolyUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.*
 import org.json.JSONObject
+import retrofit2.HttpException
 
 import java.io.IOException
 
