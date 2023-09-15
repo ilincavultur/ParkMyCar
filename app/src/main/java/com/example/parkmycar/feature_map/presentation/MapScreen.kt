@@ -182,7 +182,9 @@ fun MapScreen(
                 content = {
                     viewModel.state.value.spots.forEach { spot ->
                         Marker(
-                            state = MarkerState(LatLng(spot.lat ?: 0.0, spot.lng ?: 0.0)),
+                            state = MarkerState(LatLng(spot.lat ?: 0.0, spot.lng ?: 0.0)).apply {
+                              if (state.isSnippetVisible) this.showInfoWindow() else this.hideInfoWindow()
+                            },
                             title = "${spot.type} (${spot.lat}, ${spot.lng})",
                             snippet = "Short click to delete, \n Long Click to Open Control",
                             onInfoWindowClick = {
@@ -197,6 +199,9 @@ fun MapScreen(
                             },
                             onClick = {
                                 it.showInfoWindow()
+                                viewModel.onEvent(
+                                    MapEvent.OnCarSpotMarkerClick
+                                )
                                 true
                             },
                             icon = when (spot.type) {
@@ -273,20 +278,9 @@ fun MapScreen(
                     }
 
                     state.path.forEach { latLng ->
-                        Log.d(TAG, "MapScreen: " + latLng + "\n")
-                        //viewModel.onEvent(MapEvent.DrawPolylines(latLng))
                         drawPolylines += latLng
                     }
-//                    if (state.currentLocation!= null) {
-//                        state.path.forEach { latLng ->
-//                            if (latLng.contains(LatLng(state.currentLocation.latitude, state.currentLocation.longitude))) {
-//                                drawPolylines -= latLng
-//                            }
-//                        }
-//                    }
-
                     Polyline(
-                        //points = state.drawPolylines,
                         points = drawPolylines,
                         color = Color.Red,
                         width = 10f

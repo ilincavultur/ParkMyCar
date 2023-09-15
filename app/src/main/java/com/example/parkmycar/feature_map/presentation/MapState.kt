@@ -26,4 +26,5 @@ data class MapState(
     val currentLocation: Location? = null,
     var isInShowRouteState: Boolean = false,
     var isInTrackingRouteState: Boolean = false,
+    var isSnippetVisible: Boolean = false
 )

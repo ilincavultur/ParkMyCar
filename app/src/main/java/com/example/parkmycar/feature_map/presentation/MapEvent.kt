@@ -5,10 +5,12 @@ import android.location.Location
 import com.example.parkmycar.feature_map.domain.models.Spot
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.CameraPositionState
 
 sealed class MapEvent {
     data class OnMapLongClick(val latLng: LatLng): MapEvent()
+    object OnCarSpotMarkerClick: MapEvent()
     data class OnInfoWindowClick(val spot: Spot): MapEvent() // does not exist
     data class OnInfoWindowLongClick(val spot: Spot): MapEvent()
     object MapLoaded: MapEvent()

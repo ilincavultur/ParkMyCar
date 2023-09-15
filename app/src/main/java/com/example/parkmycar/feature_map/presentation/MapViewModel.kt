@@ -272,8 +272,8 @@ class MapViewModel @Inject constructor(
                                 _state.value = state.value.copy(
                                     path = result.data ?: mutableListOf(),
                                     isLoading = false,
-                                    isInShowRouteState = true,
-                                    //isMarkerControlDialogDisplayed = false
+                                    isInShowRouteState = false,
+                                    isMarkerControlDialogDisplayed = false,
                                 )
                                 _eventFlow.emit(
                                     MapUiEvent.ShowSnackbar(
@@ -286,7 +286,8 @@ class MapViewModel @Inject constructor(
                                     path = result.data ?: mutableListOf(),
                                     isLoading = true,
                                     isInShowRouteState = true,
-                                    //isMarkerControlDialogDisplayed = false
+                                    isMarkerControlDialogDisplayed = false,
+                                    isSnippetVisible = false
                                 )
                             }
                             is Resource.Success -> {
@@ -294,7 +295,8 @@ class MapViewModel @Inject constructor(
                                     path = result.data ?: mutableListOf(),
                                     isLoading = false,
                                     isInShowRouteState = true,
-                                    //isMarkerControlDialogDisplayed = false
+                                    isMarkerControlDialogDisplayed = false,
+                                    isSnippetVisible = false
                                 )
                             }
                         }
@@ -303,8 +305,10 @@ class MapViewModel @Inject constructor(
             }
             is MapEvent.UpdateLocation -> {
                 var newPath = mutableListOf<List<LatLng>>()
-                viewModelScope.launch {
-                    if (state.value.path.isNotEmpty() && state.value.path.first().size >= 2) {
+
+                //
+                if (state.value.path.isNotEmpty() && state.value.path.first().size >= 2) {
+                    viewModelScope.launch {
                         val currentPath = state.value.path.first()
                         val distanceFirstLatLng = distance(state.value.path.first()[0].latitude, state.value.path.first()[0].longitude, event.location.latitude, event.location.longitude)
                         val distanceSecondLatLng = distance(state.value.path.first()[1].latitude, state.value.path.first()[1].longitude, event.location.latitude, event.location.longitude)
@@ -314,17 +318,18 @@ class MapViewModel @Inject constructor(
                             if (distanceFirstLatLng < 0.1 || distanceSecondLatLng < 0.1) {
                                 state.value.path.first().slice(indices = IntRange(2,size))
                             } else {
-                                currentPath
+                                //currentPath
+                                emptyList()
                             }
-
                         )
                     }
                 }
+                //}
 
                 _state.value = state.value.copy(
                     currentLocation = event.location,
                 )
-                if (newPath.isNotEmpty()) {
+                if (newPath.isNotEmpty() && newPath.first().isNotEmpty()) {
                     _state.value = state.value.copy(
                         path = newPath
                     )
@@ -355,6 +360,11 @@ class MapViewModel @Inject constructor(
                     isInShowRouteState = false,
                     isInTrackingRouteState = false,
                     path = mutableListOf()
+                )
+            }
+            is MapEvent.OnCarSpotMarkerClick -> {
+                _state.value = state.value.copy(
+                    isSnippetVisible = true
                 )
             }
         }
