@@ -13,9 +13,6 @@ class FindParkingLots(
     private val repository: SpotRepository
 ) {
     operator fun invoke(latLng: LatLng) : Flow<Resource<List<Spot>>> {
-        Log.d(ContentValues.TAG, "onEvent: invoke")
-        println(latLng.latitude)
-        println(latLng.longitude)
         return repository.findParkingLots(latLng)
     }
 }

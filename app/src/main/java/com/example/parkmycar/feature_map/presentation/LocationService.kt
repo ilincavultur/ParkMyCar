@@ -60,8 +60,6 @@ class LocationService: Service() {
             .onEach { location ->
                 val lat = location.latitude.toString()
                 val lng = location.longitude.toString()
-//                lat = location.latitude.toString()
-//                lng = location.longitude.toString()
                 val updatedNotification = notification.setContentText(
                     "Location: ($lat, $lng)"
                 )

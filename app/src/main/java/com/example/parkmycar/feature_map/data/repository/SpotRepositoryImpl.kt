@@ -74,11 +74,9 @@ class SpotRepositoryImpl(
 
     override fun findParkingLots(latLng: LatLng): Flow<Resource<List<Spot>>> = flow {
         emit(Resource.Loading())
-        Log.d(TAG, "findParkingLots: i am here first")
+        //Log.d(TAG, "findParkingLots: i am here first")
         val lat = latLng.latitude
-        println(" lat : " + lat)
         val lng = latLng.longitude
-        println(" lng : " + lng)
         try {
             val remoteSpots = placeApi.findParkingLots(
                 fields = "formatted_address,name,geometry",
@@ -98,23 +96,11 @@ class SpotRepositoryImpl(
                 )
             }
             emit(Resource.Success(newParkingLots))
-
-            /*
-            https://maps.googleapis.com/maps/api/place/findplacefromtext/json
-  ?fields=formatted_address%2Cname%2Crating%2Copening_hours%2Cgeometry
-  &input=mongolian
-  &inputtype=textquery
-  &locationbias=circle%3A2000%4047.6918452%2C-122.2226413
-  &key=YOUR_API_KEY
-             */
-
         } catch (e: HttpException) {
             emit(Resource.Error(message = "Ooops something went wrong", data = emptyList()))
         } catch (e: IOException) {
             emit(Resource.Error(message = "Check internet connection", data = emptyList()))
         }
-
-        //emit(Resource.Success(remoteSpots))
     }
 
     override suspend fun computeRoute(source: String, target: String) : Flow<Resource<MutableList<List<LatLng>>>> = flow {
