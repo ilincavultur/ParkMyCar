@@ -5,6 +5,9 @@ The user can request to get route towards spots and follow the routes using a fo
 The user can save spots for later or remove them from the database to save some space. <br>
 Splash screen using Lottie animation. <br>
 Custom Google Map. <br>
+For parking lots search currently using the Find Place Api from Google <br> 
+instead of Nearby Search Api for payment reasons. <br>
+(the first one has the field selection option)
 
 <img width="350" alt="Screenshot 2023-09-15 at 17 32 24" src="https://github.com/ilincavultur/ParkMyCar/assets/41162207/9bd99bc2-ac21-44e6-a456-bb56871cce4f">
 
