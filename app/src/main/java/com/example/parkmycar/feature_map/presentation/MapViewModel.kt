@@ -77,7 +77,9 @@ class MapViewModel @Inject constructor(
             }
             MapEvent.OnSearchButtonClick -> {
                 Log.d(TAG, "onEvent: OnSearchButtonClick")
-                loadParkingLots()
+                println(state.value.currentLocation?.latitude)
+                println(state.value.currentLocation?.longitude)
+                loadParkingLots(LatLng(state.value.currentLocation?.latitude ?: 0.0, state.value.currentLocation?.longitude ?: 0.0))
             }
             MapEvent.OnHideCarSpotsToggleClick -> {
                 Log.d(TAG, "onEvent: OnHideCarSpotsToggleClick")
@@ -201,7 +203,6 @@ class MapViewModel @Inject constructor(
                         event.spot
                     )
                     withContext(Dispatchers.Main) {
-                        //loadMarkers()
                         _state.value = state.value.copy(
                             isAlertDialogDisplayed = false,
                             isMarkerControlDialogDisplayed = false
@@ -306,7 +307,6 @@ class MapViewModel @Inject constructor(
             is MapEvent.UpdateLocation -> {
                 var newPath = mutableListOf<List<LatLng>>()
 
-                //
                 if (state.value.path.isNotEmpty() && state.value.path.first().size >= 2) {
                     viewModelScope.launch {
                         val currentPath = state.value.path.first()
@@ -324,7 +324,6 @@ class MapViewModel @Inject constructor(
                         )
                     }
                 }
-                //}
 
                 _state.value = state.value.copy(
                     currentLocation = event.location,
@@ -405,9 +404,12 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun loadParkingLots() {
+    private fun loadParkingLots(latLng: LatLng) {
+        Log.d(TAG, "onEvent: loadParkingLots")
+        println(state.value.currentLocation?.latitude)
+        println(state.value.currentLocation?.longitude)
         viewModelScope.launch {
-            parkingUseCases.findParkingLots()
+            parkingUseCases.findParkingLots(latLng)
                 .onEach { result ->
                     when(result) {
                         is Resource.Error -> {
@@ -439,6 +441,7 @@ class MapViewModel @Inject constructor(
     }
 }
 
+// START: https://stackoverflow.com/questions/18170131/comparing-two-locations-using-their-longitude-and-latitude
 private fun distance(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
     val earthRadius = 3958.75 // in miles, change to 6371 for kilometer output
 
@@ -455,3 +458,4 @@ private fun distance(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Do
 
     return earthRadius * c // output distance, in MILES
 }
+// END: https://stackoverflow.com/questions/18170131/comparing-two-locations-using-their-longitude-and-latitude

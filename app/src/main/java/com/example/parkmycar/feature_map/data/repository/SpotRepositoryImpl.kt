@@ -72,17 +72,19 @@ class SpotRepositoryImpl(
         return dao.exists(id)
     }
 
-    override fun findParkingLots(): Flow<Resource<List<Spot>>> = flow {
+    override fun findParkingLots(latLng: LatLng): Flow<Resource<List<Spot>>> = flow {
         emit(Resource.Loading())
         Log.d(TAG, "findParkingLots: i am here first")
-        val lat = 1.35
-        val lng = 103.87
+        val lat = latLng.latitude
+        println(" lat : " + lat)
+        val lng = latLng.longitude
+        println(" lng : " + lng)
         try {
             val remoteSpots = placeApi.findParkingLots(
                 fields = "formatted_address,name,geometry",
                 input = "parking",
                 inputtype = "textquery",
-                locationbias = "circle:radius@${lat},${lng}",
+                locationbias = "circle:4000@${lat},${lng}",
                 apiKey = BuildConfig.MAPS_API_KEY,
             )
             val newParkingLots = remoteSpots.candidates.map {

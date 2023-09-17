@@ -24,6 +24,7 @@ class DefaultLocationClient(
     private val client: FusedLocationProviderClient,
 ): LocationClient {
 
+    // START: https://medium.com/@boobalaninfo/accessing-users-location-guide-android-2023-60a6f018a718
     @SuppressLint("MissingPermission")
     override fun getLocationUpdates(interval: Long): Flow<Location> {
         return callbackFlow {

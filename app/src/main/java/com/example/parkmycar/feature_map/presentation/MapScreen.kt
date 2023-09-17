@@ -108,7 +108,7 @@ fun MapScreen(
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location : Location? ->
                 if (location != null) {
-                    Log.d(TAG, "MapScreen: UpdateLocation")
+                    //Log.d(TAG, "MapScreen: UpdateLocation")
                     viewModel.onEvent(MapEvent.UpdateLocation(location))
                 }
             }
@@ -117,7 +117,7 @@ fun MapScreen(
 
 //    // Update blue dot and camera when the location changes
     LaunchedEffect(state.currentLocation) {
-        Log.d(TAG, "Updating blue dot on map...")
+        //Log.d(TAG, "Updating blue dot on map...")
         if (state.isMapLoaded) {
             state.currentLocation?.let {
                 locationSource.onLocationChanged(it)
@@ -161,13 +161,6 @@ fun MapScreen(
     }
 
     if (state.permissionsGranted) {
-        //var isMapLoaded by remember { mutableStateOf(state.isMapLoaded) }
-        //var isMapLoaded by remember { mutableStateOf(false) }
-        // Observing and controlling the camera's state can be done with a CameraPositionState
-//        val cameraPositionState = rememberCameraPositionState {
-//            position = defaultCameraPosition
-//        }
-
         Box(Modifier.fillMaxSize()) {
             GoogleMapView(
                 modifier = Modifier.matchParentSize(),

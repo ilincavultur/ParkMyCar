@@ -14,7 +14,7 @@ interface SpotRepository {
 
     suspend fun exists(id: Int) : Boolean
 
-    fun findParkingLots(): Flow<Resource<List<Spot>>>
+    fun findParkingLots(latLng: LatLng): Flow<Resource<List<Spot>>>
 
     suspend fun computeRoute(source: String, target: String) : Flow<Resource<MutableList<List<LatLng>>>>
 }
